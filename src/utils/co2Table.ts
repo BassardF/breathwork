@@ -13,11 +13,11 @@ export function buildCo2Table({
   startRestSeconds = pbSeconds * 2,
   restDecrementSeconds = 15,
 }: Co2TableOptions): Co2Round[] {
-  const boundedHoldPct = Math.min(0.65, Math.max(0.4, holdPct));
+  const boundedHoldPct = Math.min(1.2, Math.max(0.2, holdPct));
   const holdSeconds = Math.max(15, Math.round(pbSeconds * boundedHoldPct));
 
   return Array.from({ length: 8 }, (_, index) => ({
     holdSeconds,
-    restSeconds: Math.max(30, Math.round(startRestSeconds - index * restDecrementSeconds)),
+    restSeconds: Math.max(3, Math.round(startRestSeconds - index * restDecrementSeconds)),
   }));
 }

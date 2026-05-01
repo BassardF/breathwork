@@ -11,12 +11,14 @@ interface CircleAnimationProps {
     | 'idle';
   intensity?: number;
   durationMs?: number;
+  breathingProgress?: number;
 }
 
 function CircleAnimationInner({
   phase,
   intensity = 1,
   durationMs = 700,
+  breathingProgress,
 }: CircleAnimationProps) {
   const emptyScale = 0.8;
   const fullScale = 1.04 + intensity * 0.025;
@@ -24,14 +26,28 @@ function CircleAnimationInner({
   const isFull = phase === 'hold' || phase === 'hold-full' || phase === 'inhale';
   const isTransitioning = phase === 'inhale' || phase === 'exhale';
 
-  const scale = isEmpty ? emptyScale : isFull ? fullScale : 1;
+  const scale =
+    breathingProgress !== undefined
+      ? emptyScale + (fullScale - emptyScale) * breathingProgress
+      : isEmpty
+        ? emptyScale
+        : isFull
+          ? fullScale
+          : 1;
 
   const ringOpacity =
-    phase === 'idle' ? 0.28 : isFull ? 0.44 : 0.3;
+    breathingProgress !== undefined
+      ? 0.3 + (0.44 - 0.3) * breathingProgress
+      : phase === 'idle'
+        ? 0.28
+        : isFull
+          ? 0.44
+          : 0.3;
 
   const animationStyle = {
     transform: `scale(${scale})`,
-    transitionDuration: `${durationMs}ms`,
+    transitionDuration:
+      breathingProgress !== undefined ? '0ms' : `${durationMs}ms`,
     transitionTimingFunction: isTransitioning ? 'linear' : 'ease-out',
   };
 

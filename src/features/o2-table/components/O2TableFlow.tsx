@@ -10,6 +10,7 @@ import { buildO2Table } from '../../../utils/o2Table';
 import { formatClock } from '../../../utils/formatTime';
 import { useBreathHoldsQuery } from '../../breath-hold/queries';
 import { useSaveO2SessionMutation } from '../queries';
+import { getBreathingProgress } from '../../../utils/breathingAnimation';
 
 export function O2TableFlow() {
   const { data: holds = [] } = useBreathHoldsQuery();
@@ -17,13 +18,14 @@ export function O2TableFlow() {
   const pb = holds[0]?.duration_seconds ?? 180;
   const [restSeconds, setRestSeconds] = useState(120);
   const [maxHoldPct, setMaxHoldPct] = useState(0.8);
+  const [startHoldPct, setStartHoldPct] = useState(0.3);
   const [roundIndex, setRoundIndex] = useState(0);
   const [phase, setPhase] = useState<'setup' | 'rest' | 'hold' | 'complete'>('setup');
   const startSession = useSessionStore((state) => state.startSession);
   const updateSession = useSessionStore((state) => state.updateSession);
   const clearSession = useSessionStore((state) => state.clearSession);
 
-  const rounds = useMemo(() => buildO2Table({ pbSeconds: pb, restSeconds, maxHoldPct }), [maxHoldPct, pb, restSeconds]);
+  const rounds = useMemo(() => buildO2Table({ pbSeconds: pb, restSeconds, maxHoldPct, startHoldPct }), [maxHoldPct, pb, restSeconds, startHoldPct]);
   const currentRound = rounds[roundIndex];
 
   const timer = useTimer({
@@ -82,16 +84,28 @@ export function O2TableFlow() {
           <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">O2 Table</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">Fixed rest. Rising hold.</h2>
         </div>
-        <CircleAnimation phase={phase === 'hold' ? 'inhale' : 'rest'} intensity={phase === 'hold' ? 1.6 : 0.8} />
+        <CircleAnimation
+          phase={phase === 'hold' ? 'hold' : phase === 'setup' ? 'idle' : 'rest'}
+          breathingProgress={
+            phase === 'rest' && currentRound
+              ? getBreathingProgress(
+                  currentRound.restSeconds * 1000 - timer.elapsedMs,
+                  currentRound.restSeconds * 1000,
+                )
+              : phase === 'hold'
+                ? 1
+                : undefined
+          }
+        />
         {phase === 'setup' ? (
           <div className="space-y-4">
             <label className="block text-sm text-slate-300">
               Rest duration: {formatClock(restSeconds)}
               <input
                 className="mt-2 w-full accent-sky-200"
-                min={60}
-                max={180}
-                step={15}
+                min={30}
+                max={300}
+                step={10}
                 type="range"
                 value={restSeconds}
                 onChange={(event) => setRestSeconds(Number(event.target.value))}
@@ -101,12 +115,24 @@ export function O2TableFlow() {
               Max hold target: {Math.round(maxHoldPct * 100)}%
               <input
                 className="mt-2 w-full accent-sky-200"
-                min={70}
-                max={90}
+                min={50}
+                max={100}
                 step={5}
                 type="range"
                 value={maxHoldPct * 100}
                 onChange={(event) => setMaxHoldPct(Number(event.target.value) / 100)}
+              />
+            </label>
+            <label className="block text-sm text-slate-300">
+              Starting hold: {Math.round(startHoldPct * 100)}%
+              <input
+                className="mt-2 w-full accent-sky-200"
+                min={10}
+                max={70}
+                step={5}
+                type="range"
+                value={startHoldPct * 100}
+                onChange={(event) => setStartHoldPct(Number(event.target.value) / 100)}
               />
             </label>
             <Button fullWidth onClick={start}>
@@ -151,13 +177,20 @@ export function O2TableFlow() {
       <Card className="space-y-4">
         <h3 className="text-xl font-semibold text-white">Preview</h3>
         <div className="space-y-2">
-          {rounds.map((round, index) => (
-            <div key={`${round.holdSeconds}-${index}`} className="grid grid-cols-3 rounded-3xl bg-slate-950/45 px-4 py-3 text-sm text-slate-300">
-              <span>#{index + 1}</span>
-              <span>Rest {formatClock(round.restSeconds)}</span>
-              <span>Hold {formatClock(round.holdSeconds)}</span>
-            </div>
-          ))}
+          {rounds.map((round, index) => {
+            const isDone = index < roundIndex && (phase !== 'setup' && phase !== 'complete');
+            const isCurrent = index === roundIndex && phase !== 'setup' && phase !== 'complete';
+            return (
+              <div
+                key={`${round.holdSeconds}-${index}`}
+                className={`grid grid-cols-3 rounded-3xl px-4 py-3 text-sm ${isDone ? 'bg-emerald-950/30 text-emerald-400' : isCurrent ? 'bg-sky-950/40 text-sky-300' : 'bg-slate-950/45 text-slate-300'}`}
+              >
+                <span>{isDone ? `✓ #${index + 1}` : `#${index + 1}`}</span>
+                <span>Rest {formatClock(round.restSeconds)}</span>
+                <span>Hold {formatClock(round.holdSeconds)}</span>
+              </div>
+            );
+          })}
         </div>
       </Card>
     </div>

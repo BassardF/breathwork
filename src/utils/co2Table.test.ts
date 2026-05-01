@@ -15,7 +15,7 @@ describe('buildCo2Table', () => {
       startRestSeconds: 50,
       restDecrementSeconds: 10,
     });
-    expect(rounds[0].holdSeconds).toBe(26);
-    expect(rounds[7].restSeconds).toBe(30);
+    expect(rounds[0].holdSeconds).toBe(36);
+    expect(rounds[7].restSeconds).toBe(3);
   });
 });

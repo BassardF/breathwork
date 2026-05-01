@@ -9,7 +9,7 @@ describe('buildO2Table', () => {
 
   it('enforces rest and max percentage boundaries', () => {
     const rounds = buildO2Table({ pbSeconds: 100, restSeconds: 999, maxHoldPct: 2 });
-    expect(rounds[0].restSeconds).toBe(180);
-    expect(rounds[7].holdSeconds).toBe(90);
+    expect(rounds[0].restSeconds).toBe(300);
+    expect(rounds[7].holdSeconds).toBe(100);
   });
 });
