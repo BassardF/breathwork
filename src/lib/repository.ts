@@ -47,7 +47,7 @@ export async function signInWithMagicLink(email: string) {
   await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: window.location.origin,
+      emailRedirectTo: window.location.origin + window.location.pathname,
     },
   });
 }
