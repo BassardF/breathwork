@@ -73,4 +73,5 @@ export interface O2Round {
 export interface PatternPreset {
   name: string;
   phases: BreathingPhase[];
+  description: string;
 }

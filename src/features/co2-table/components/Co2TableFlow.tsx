@@ -70,7 +70,8 @@ export function Co2TableFlow() {
       startTimer();
       updateSession({ round: roundIndex + 1, phase, isRunning: true });
     }
-  }, [currentRound, phase, resetTimer, roundIndex, startTimer, updateSession]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRound, phase, resetTimer, roundIndex, startTimer]);
 
   useEffect(() => {
     updateSession({ elapsed: timer.elapsedMs });

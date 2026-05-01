@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { CircleAnimation } from '../../../components/ui/CircleAnimation';
@@ -7,8 +7,8 @@ import { useTimer } from '../../../hooks/useTimer';
 import { useWakeLock } from '../../../hooks/useWakeLock';
 import type { BreathingPhase } from '../../../types/domain';
 import { formatClock } from '../../../utils/formatTime';
-import { getCycleSeconds, PRESET_PATTERNS, validatePattern } from '../../../utils/patterns';
-import { useCustomPatternsQuery, useSaveBreathingSessionMutation, useSaveCustomPatternMutation } from '../queries';
+import { getBreathsPerMinute, getCycleSeconds, getPatternSummary, PRESET_PATTERNS, validatePattern } from '../../../utils/patterns';
+import { useSaveBreathingSessionMutation, useSaveCustomPatternMutation } from '../queries';
 
 const DURATIONS = [300, 600, 900, 1200];
 
@@ -42,7 +42,6 @@ function getAnimationPhase(phase: BreathingPhase | undefined): AnimationPhase {
 }
 
 export function BreathingPatternsFlow() {
-  const { data: customPatterns = [] } = useCustomPatternsQuery();
   const saveSessionMutation = useSaveBreathingSessionMutation();
   const savePatternMutation = useSaveCustomPatternMutation();
   const [selectedName, setSelectedName] = useState(PRESET_PATTERNS[0].name);
@@ -110,14 +109,6 @@ export function BreathingPatternsFlow() {
 
   useWakeLock(status === 'running');
 
-  const options = useMemo(
-    () => [
-      ...PRESET_PATTERNS.map((pattern) => ({ name: pattern.name, phases: pattern.phases })),
-      ...customPatterns.map((pattern) => ({ name: pattern.name, phases: pattern.phases })),
-    ],
-    [customPatterns],
-  );
-
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(320px,420px)]">
       <Card className="space-y-6">
@@ -182,40 +173,84 @@ export function BreathingPatternsFlow() {
           </div>
         ) : (
           <div className="space-y-4">
-            <label className="block text-sm text-slate-300">
-              Pattern
-              <select
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none"
-                value={selectedName}
-                onChange={(event) => {
-                  if (event.target.value === '__custom__') {
-                    setSelectedName('Custom Pattern');
-                    setPatternNameInput('Custom Pattern');
-                    setPhases([
-                      { name: 'Inhale', seconds: 4, kind: 'inhale' },
-                      { name: 'Hold', seconds: 4, kind: 'hold' },
-                      { name: 'Exhale', seconds: 6, kind: 'exhale' },
-                    ]);
-                    setIsCustomPattern(true);
-                    return;
-                  }
-                  const selected = options.find((option) => option.name === event.target.value);
-                  if (selected) {
-                    setSelectedName(selected.name);
-                    setPhases(selected.phases);
-                    setPatternNameInput(selected.name);
-                    setIsCustomPattern(false);
-                  }
+            <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">Pattern</p>
+            <div className="space-y-1">
+              {PRESET_PATTERNS.map((preset) => {
+                const isSelected = !isCustomPattern && selectedName === preset.name;
+                return (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    onClick={() => {
+                      setPhases(preset.phases);
+                      setSelectedName(preset.name);
+                      setIsCustomPattern(false);
+                      setPatternNameInput(preset.name);
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors ${
+                      isSelected
+                        ? 'border-sky-300/40 bg-sky-950/40'
+                        : 'border-white/8 bg-slate-950/45 hover:border-white/20'
+                    }`}
+                  >
+                    <span
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                        isSelected ? 'border-sky-300 bg-sky-300/20' : 'border-slate-600'
+                      }`}
+                    >
+                      {isSelected ? <span className="h-2.5 w-2.5 rounded-full bg-sky-300" /> : null}
+                    </span>
+                    <span className="flex-1 text-sm font-medium text-white">{preset.name}</span>
+                    <span className="text-xs tracking-wider text-slate-500">{getPatternSummary(preset.phases)}</span>
+                    <span className="text-[11px] text-slate-600">▼ {getBreathsPerMinute(preset.phases)}/min</span>
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedName('Custom Pattern');
+                  setPatternNameInput('Custom Pattern');
+                  setPhases([
+                    { name: 'Inhale', seconds: 4, kind: 'inhale' },
+                    { name: 'Hold', seconds: 4, kind: 'hold' },
+                    { name: 'Exhale', seconds: 6, kind: 'exhale' },
+                  ]);
+                  setIsCustomPattern(true);
                 }}
+                className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors ${
+                  isCustomPattern
+                    ? 'border-sky-300/40 bg-sky-950/40'
+                    : 'border-dashed border-white/15 bg-slate-950/30 hover:border-white/30'
+                }`}
               >
-                {options.map((option) => (
-                  <option key={option.name} value={option.name}>
-                    {option.name}
-                  </option>
-                ))}
-                <option value="__custom__">Custom Pattern</option>
-              </select>
-            </label>
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                    isCustomPattern ? 'border-sky-300 bg-sky-300/20' : 'border-slate-600'
+                  }`}
+                >
+                  {isCustomPattern ? <span className="h-2.5 w-2.5 rounded-full bg-sky-300" /> : null}
+                </span>
+                <span className="text-sm text-slate-400">Custom pattern</span>
+              </button>
+            </div>
+
+            {!isCustomPattern ? (
+              <div className="space-y-3">
+                <p className="text-xs leading-relaxed text-slate-500">
+                  {PRESET_PATTERNS.find((p) => p.name === selectedName)?.description}
+                </p>
+                <div className="flex gap-2">
+                  {phases.map((phase, i) => (
+                    <div key={i} className="flex-1 rounded-xl bg-slate-950/45 px-3 py-2 text-center">
+                      <p className="text-[11px] text-slate-500">{phase.name}</p>
+                      <p className="text-sm font-medium text-white">{phase.seconds}s</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             <label className="block text-sm text-slate-300">
               Total duration
               <select
@@ -231,7 +266,7 @@ export function BreathingPatternsFlow() {
               </select>
             </label>
             {isCustomPattern ? (
-              <div className="space-y-3 rounded-[28px] border border-white/8 bg-slate-950/45 p-4">
+              <div className="space-y-4 rounded-[28px] border border-white/8 bg-slate-950/45 p-4">
                 <input
                   className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none"
                   placeholder="Pattern name"
@@ -239,56 +274,72 @@ export function BreathingPatternsFlow() {
                   onChange={(event) => setPatternNameInput(event.target.value)}
                 />
                 {phases.map((phase, index) => (
-                  <div key={`${phase.kind}-${index}`} className="grid grid-cols-[1.6fr_1fr_1fr_auto] gap-2">
-                    <input
-                      className="rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white outline-none"
-                      value={phase.name}
-                      onChange={(event) =>
-                        setPhases((value) =>
-                          value.map((entry, entryIndex) =>
-                            entryIndex === index ? { ...entry, name: event.target.value } : entry,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      className="rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white outline-none"
-                      min={1}
-                      type="number"
-                      value={phase.seconds}
-                      onChange={(event) =>
-                        setPhases((value) =>
-                          value.map((entry, entryIndex) =>
-                            entryIndex === index ? { ...entry, seconds: Number(event.target.value) } : entry,
-                          ),
-                        )
-                      }
-                    />
-                    <select
-                      className="rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white outline-none"
-                      value={phase.kind}
-                      onChange={(event) =>
-                        setPhases((value) =>
-                          value.map((entry, entryIndex) =>
-                            entryIndex === index
-                              ? { ...entry, kind: event.target.value as BreathingPhase['kind'] }
-                              : entry,
-                          ),
-                        )
-                      }
-                    >
-                      <option value="inhale">Inhale</option>
-                      <option value="hold">Hold</option>
-                      <option value="exhale">Exhale</option>
-                      <option value="hold2">Hold 2</option>
-                    </select>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => setPhases((value) => value.filter((_, entryIndex) => entryIndex !== index))}
-                    >
-                      Remove
-                    </Button>
+                  <div key={`${phase.kind}-${index}`} className="rounded-2xl border border-white/6 bg-slate-950/30 px-4 py-3">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs tracking-[0.2em] text-slate-500 uppercase">Phase {index + 1}</span>
+                      <button
+                        type="button"
+                        className="text-xs text-rose-400/70 hover:text-rose-300 transition-colors"
+                        onClick={() => setPhases((value) => value.filter((_, entryIndex) => entryIndex !== index))}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="mb-1 text-[11px] text-slate-500">Name</p>
+                        <input
+                          className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white outline-none"
+                          value={phase.name}
+                          onChange={(event) =>
+                            setPhases((value) =>
+                              value.map((entry, entryIndex) =>
+                                entryIndex === index ? { ...entry, name: event.target.value } : entry,
+                              ),
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="mb-1 text-[11px] text-slate-500">Duration (s)</p>
+                          <input
+                            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white outline-none"
+                            min={1}
+                            type="number"
+                            value={phase.seconds}
+                            onChange={(event) =>
+                              setPhases((value) =>
+                                value.map((entry, entryIndex) =>
+                                  entryIndex === index ? { ...entry, seconds: Number(event.target.value) } : entry,
+                                ),
+                              )
+                            }
+                          />
+                        </div>
+                        <div>
+                          <p className="mb-1 text-[11px] text-slate-500">Type</p>
+                          <select
+                            className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white outline-none"
+                            value={phase.kind}
+                            onChange={(event) =>
+                              setPhases((value) =>
+                                value.map((entry, entryIndex) =>
+                                  entryIndex === index
+                                    ? { ...entry, kind: event.target.value as BreathingPhase['kind'] }
+                                    : entry,
+                                ),
+                              )
+                            }
+                          >
+                            <option value="inhale">Inhale</option>
+                            <option value="hold">Hold</option>
+                            <option value="exhale">Exhale</option>
+                            <option value="hold2">Hold 2</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
                 <Button
