@@ -2,6 +2,7 @@
 import type { Session, User } from '@supabase/supabase-js';
 import { queryClient } from './queryClient';
 import { supabase } from './supabase';
+import { useAuthStore } from '../stores/authStore';
 import type {
   BreathHoldEntry,
   BreathingPhase,
@@ -71,6 +72,9 @@ export async function updateSafetyAcknowledgement() {
 }
 
 export async function getSession() {
+  if (useAuthStore.getState().isLocalMode) {
+    return null;
+  }
   if (!supabase) {
     return null;
   }
@@ -78,7 +82,9 @@ export async function getSession() {
   return data.session;
 }
 
-export async function fetchBreathHolds(session: Session | null): Promise<BreathHoldEntry[]> {
+export async function fetchBreathHolds(
+  session: Session | null,
+): Promise<BreathHoldEntry[]> {
   if (!supabase || !session) {
     return readLocal<BreathHoldEntry>(BREATH_HOLDS_KEY);
   }
@@ -96,7 +102,10 @@ export async function fetchBreathHolds(session: Session | null): Promise<BreathH
   return data;
 }
 
-export async function saveBreathHold(session: Session | null, durationSeconds: number) {
+export async function saveBreathHold(
+  session: Session | null,
+  durationSeconds: number,
+) {
   if (!supabase || !session) {
     const nextEntry: BreathHoldEntry = {
       id: createId(),
@@ -104,9 +113,10 @@ export async function saveBreathHold(session: Session | null, durationSeconds: n
       duration_seconds: durationSeconds,
       recorded_at: new Date().toISOString(),
     };
-    const entries = [nextEntry, ...readLocal<BreathHoldEntry>(BREATH_HOLDS_KEY)].sort(
-      (a, b) => b.duration_seconds - a.duration_seconds,
-    );
+    const entries = [
+      nextEntry,
+      ...readLocal<BreathHoldEntry>(BREATH_HOLDS_KEY),
+    ].sort((a, b) => b.duration_seconds - a.duration_seconds);
     writeLocal(BREATH_HOLDS_KEY, entries);
     return nextEntry;
   }
@@ -129,7 +139,9 @@ export async function saveBreathHold(session: Session | null, durationSeconds: n
   return data;
 }
 
-export async function fetchCo2Sessions(session: Session | null): Promise<Co2Session[]> {
+export async function fetchCo2Sessions(
+  session: Session | null,
+): Promise<Co2Session[]> {
   if (!supabase || !session) {
     return readLocal<Co2Session>(CO2_SESSIONS_KEY);
   }
@@ -146,7 +158,10 @@ export async function fetchCo2Sessions(session: Session | null): Promise<Co2Sess
 
 export async function saveCo2Session(
   session: Session | null,
-  payload: Pick<Co2Session, 'pb_used_seconds' | 'hold_pct' | 'completed_rounds'>,
+  payload: Pick<
+    Co2Session,
+    'pb_used_seconds' | 'hold_pct' | 'completed_rounds'
+  >,
 ) {
   if (!supabase || !session) {
     const nextEntry: Co2Session = {
@@ -155,7 +170,10 @@ export async function saveCo2Session(
       completed_at: new Date().toISOString(),
       ...payload,
     };
-    writeLocal(CO2_SESSIONS_KEY, [nextEntry, ...readLocal<Co2Session>(CO2_SESSIONS_KEY)]);
+    writeLocal(CO2_SESSIONS_KEY, [
+      nextEntry,
+      ...readLocal<Co2Session>(CO2_SESSIONS_KEY),
+    ]);
     return nextEntry;
   }
   const client = supabase as any;
@@ -174,7 +192,9 @@ export async function saveCo2Session(
   return data;
 }
 
-export async function fetchO2Sessions(session: Session | null): Promise<O2Session[]> {
+export async function fetchO2Sessions(
+  session: Session | null,
+): Promise<O2Session[]> {
   if (!supabase || !session) {
     return readLocal<O2Session>(O2_SESSIONS_KEY);
   }
@@ -191,7 +211,13 @@ export async function fetchO2Sessions(session: Session | null): Promise<O2Sessio
 
 export async function saveO2Session(
   session: Session | null,
-  payload: Pick<O2Session, 'pb_used_seconds' | 'rest_duration_seconds' | 'max_hold_pct' | 'completed_rounds'>,
+  payload: Pick<
+    O2Session,
+    | 'pb_used_seconds'
+    | 'rest_duration_seconds'
+    | 'max_hold_pct'
+    | 'completed_rounds'
+  >,
 ) {
   if (!supabase || !session) {
     const nextEntry: O2Session = {
@@ -200,7 +226,10 @@ export async function saveO2Session(
       completed_at: new Date().toISOString(),
       ...payload,
     };
-    writeLocal(O2_SESSIONS_KEY, [nextEntry, ...readLocal<O2Session>(O2_SESSIONS_KEY)]);
+    writeLocal(O2_SESSIONS_KEY, [
+      nextEntry,
+      ...readLocal<O2Session>(O2_SESSIONS_KEY),
+    ]);
     return nextEntry;
   }
   const client = supabase as any;
@@ -219,7 +248,9 @@ export async function saveO2Session(
   return data;
 }
 
-export async function fetchBreathingSessions(session: Session | null): Promise<BreathingSession[]> {
+export async function fetchBreathingSessions(
+  session: Session | null,
+): Promise<BreathingSession[]> {
   if (!supabase || !session) {
     return readLocal<BreathingSession>(BREATHING_SESSIONS_KEY);
   }
@@ -231,7 +262,11 @@ export async function fetchBreathingSessions(session: Session | null): Promise<B
   if (error) {
     throw error;
   }
-  return (data as Array<{ phases: BreathingPhase[] } & Omit<BreathingSession, 'phases'>>).map((entry) => ({
+  return (
+    data as Array<
+      { phases: BreathingPhase[] } & Omit<BreathingSession, 'phases'>
+    >
+  ).map((entry) => ({
     ...entry,
     phases: entry.phases,
   }));
@@ -239,7 +274,10 @@ export async function fetchBreathingSessions(session: Session | null): Promise<B
 
 export async function saveBreathingSession(
   session: Session | null,
-  payload: Pick<BreathingSession, 'pattern_name' | 'phases' | 'total_duration_seconds' | 'cycles_completed'>,
+  payload: Pick<
+    BreathingSession,
+    'pattern_name' | 'phases' | 'total_duration_seconds' | 'cycles_completed'
+  >,
 ) {
   if (!supabase || !session) {
     const nextEntry: BreathingSession = {
@@ -248,7 +286,10 @@ export async function saveBreathingSession(
       completed_at: new Date().toISOString(),
       ...payload,
     };
-    writeLocal(BREATHING_SESSIONS_KEY, [nextEntry, ...readLocal<BreathingSession>(BREATHING_SESSIONS_KEY)]);
+    writeLocal(BREATHING_SESSIONS_KEY, [
+      nextEntry,
+      ...readLocal<BreathingSession>(BREATHING_SESSIONS_KEY),
+    ]);
     return nextEntry;
   }
   const client = supabase as any;
@@ -270,7 +311,9 @@ export async function saveBreathingSession(
   } as BreathingSession;
 }
 
-export async function fetchCustomPatterns(session: Session | null): Promise<CustomPattern[]> {
+export async function fetchCustomPatterns(
+  session: Session | null,
+): Promise<CustomPattern[]> {
   if (!supabase || !session) {
     return readLocal<CustomPattern>(CUSTOM_PATTERNS_KEY);
   }
@@ -282,7 +325,9 @@ export async function fetchCustomPatterns(session: Session | null): Promise<Cust
   if (error) {
     throw error;
   }
-  return (data as Array<{ phases: BreathingPhase[] } & Omit<CustomPattern, 'phases'>>).map((entry) => ({
+  return (
+    data as Array<{ phases: BreathingPhase[] } & Omit<CustomPattern, 'phases'>>
+  ).map((entry) => ({
     ...entry,
     phases: entry.phases,
   }));
@@ -299,7 +344,10 @@ export async function saveCustomPattern(
       created_at: new Date().toISOString(),
       ...payload,
     };
-    writeLocal(CUSTOM_PATTERNS_KEY, [nextEntry, ...readLocal<CustomPattern>(CUSTOM_PATTERNS_KEY)]);
+    writeLocal(CUSTOM_PATTERNS_KEY, [
+      nextEntry,
+      ...readLocal<CustomPattern>(CUSTOM_PATTERNS_KEY),
+    ]);
     return nextEntry;
   }
   const client = supabase as any;
