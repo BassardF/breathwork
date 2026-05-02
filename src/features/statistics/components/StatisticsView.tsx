@@ -1,12 +1,21 @@
+import { useState } from 'react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Card } from '../../../components/ui/Card';
 import { EmptyState } from '../../../components/ui/EmptyState';
-import type { CombinedHistoryItem } from '../../../types/domain';
+import type { CombinedHistoryItem, TrainingType } from '../../../types/domain';
 import { formatClock } from '../../../utils/formatTime';
 import { useStatisticsQuery } from '../queries';
 
+const TYPES: { value: TrainingType; label: string }[] = [
+  { value: 'breath-hold', label: 'Breath Hold' },
+  { value: 'co2', label: 'CO2 Table' },
+  { value: 'o2', label: 'O2 Table' },
+  { value: 'pattern', label: 'Breathing' },
+];
+
 export function StatisticsView() {
   const { data } = useStatisticsQuery();
+  const [selectedTypes, setSelectedTypes] = useState<TrainingType[]>([]);
 
   if (!data) {
     return <div className="text-sm text-slate-500">Loading statistics…</div>;
@@ -62,6 +71,14 @@ export function StatisticsView() {
       detail: `${entry.cycles_completed} cycles`,
     })),
   ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  const isAll = selectedTypes.length === 0;
+  const toggleType = (type: TrainingType) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
+    );
+  };
+  const filtered = isAll ? history : history.filter((entry) => selectedTypes.includes(entry.type));
 
   return (
     <div className="space-y-6">
@@ -123,9 +140,42 @@ export function StatisticsView() {
       </div>
 
       <Card className="space-y-4">
-        <h2 className="text-xl font-semibold text-white">Session history</h2>
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-xl font-semibold text-white">Session history</h2>
+          <span className="shrink-0 text-sm text-slate-500">{filtered.length} sessions</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setSelectedTypes([])}
+            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              isAll
+                ? 'border-sky-300/40 bg-sky-950/40 text-sky-300'
+                : 'border-white/10 bg-slate-950/45 text-slate-400 hover:border-white/20'
+            }`}
+          >
+            All
+          </button>
+          {TYPES.map((t) => {
+            const active = selectedTypes.includes(t.value);
+            return (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => toggleType(t.value)}
+                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                  active
+                    ? 'border-sky-300/40 bg-sky-950/40 text-sky-300'
+                    : 'border-white/10 bg-slate-950/45 text-slate-400 hover:border-white/20'
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
         <div className="space-y-3">
-          {history.map((entry) => (
+          {filtered.map((entry) => (
             <details key={`${entry.type}-${entry.id}`} className="rounded-3xl bg-slate-950/45 px-4 py-3">
               <summary className="cursor-pointer list-none">
                 <div className="flex items-center justify-between gap-4">
@@ -139,7 +189,7 @@ export function StatisticsView() {
               <p className="mt-3 text-sm text-slate-400">Type: {entry.type}</p>
             </details>
           ))}
-          {history.length === 0 ? <EmptyState title="No session history" description="Saved sessions across all modes appear here." /> : null}
+          {filtered.length === 0 ? <EmptyState title="No session history" description="Saved sessions across all modes appear here." /> : null}
         </div>
       </Card>
     </div>
