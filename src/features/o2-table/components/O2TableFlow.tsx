@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { CircleAnimation } from '../../../components/ui/CircleAnimation';
+import { InfoBlock } from '../../../components/ui/InfoBlock';
 import { TimerText } from '../../../components/ui/TimerText';
 import { useTimer } from '../../../hooks/useTimer';
 import { useWakeLock } from '../../../hooks/useWakeLock';
@@ -84,6 +85,16 @@ export function O2TableFlow() {
           <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">O2 Table</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">Fixed rest. Rising hold.</h2>
         </div>
+        <InfoBlock
+          description="Builds tolerance to low oxygen by keeping rest fixed while increasing hold time each round. Trains your body to perform under progressive oxygen debt."
+          tips={[
+            'Set your rest duration long enough to feel recovered between rounds (2-3 minutes is a good start).',
+            'Start with a conservative max hold target around 60-70% of your PB.',
+            'Focus on relaxation during holds — a still body consumes less oxygen.',
+            'The last 2-3 rounds are where the adaptation happens. Push gently.',
+            'Skip a day between O2 table sessions — your nervous system needs recovery time.',
+          ]}
+        />
         <CircleAnimation
           phase={phase === 'hold' ? 'hold' : phase === 'setup' ? 'idle' : 'rest'}
           breathingProgress={

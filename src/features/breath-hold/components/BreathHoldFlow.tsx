@@ -3,6 +3,7 @@ import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { CircleAnimation } from '../../../components/ui/CircleAnimation';
+import { InfoBlock } from '../../../components/ui/InfoBlock';
 import { TimerText } from '../../../components/ui/TimerText';
 import { useTimer } from '../../../hooks/useTimer';
 import { useWakeLock } from '../../../hooks/useWakeLock';
@@ -96,6 +97,16 @@ export function BreathHoldFlow() {
           </div>
           {isNewRecord ? <Badge>New Record</Badge> : null}
         </div>
+        <InfoBlock
+          description="A static apnea test measures how long you can comfortably hold your breath after a full exhale (or inhale). This is your baseline — track it over time to see your progress."
+          tips={[
+            'Always practice in a safe environment — seated or lying down, never in water.',
+            'Exhale fully before starting your hold for a consistent baseline.',
+            'Relax your body completely — tension burns oxygen.',
+            'Don\'t push to discomfort. The goal is a calm, controlled hold.',
+            'Wait at least 2-3 minutes between attempts to recover fully.',
+          ]}
+        />
         <CircleAnimation phase={stage === 'countdown' ? 'rest' : stage === 'holding' ? 'hold' : 'idle'} intensity={1.4} />
         {stage === 'countdown' ? (
           <TimerText value={formatClock(countdownSeconds)} label="Get ready" />

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { CircleAnimation } from '../../../components/ui/CircleAnimation';
+import { InfoBlock } from '../../../components/ui/InfoBlock';
 import { TimerText } from '../../../components/ui/TimerText';
 import { useTimer } from '../../../hooks/useTimer';
 import { useWakeLock } from '../../../hooks/useWakeLock';
@@ -92,6 +93,16 @@ export function Co2TableFlow() {
           <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">CO2 Table</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">Fixed hold. Falling rest.</h2>
         </div>
+        <InfoBlock
+          description="Builds tolerance to carbon dioxide by keeping your hold time fixed while reducing rest between rounds. Each round gets harder as less recovery time accumulates CO₂."
+          tips={[
+            'Start with a hold duration around 50% of your max breath hold for a comfortable first session.',
+            'Breathe calmly during rest — slow, deep belly breaths, not rapid panting.',
+            'If a round feels too easy, increase the hold percentage. If too hard, decrease it.',
+            'Consistency matters more than intensity — aim to complete all 8 rounds.',
+            'Log your sessions to track how your CO₂ tolerance improves over time.',
+          ]}
+        />
         <CircleAnimation
           phase={phase === 'hold' ? 'hold' : phase === 'setup' ? 'idle' : 'rest'}
           breathingProgress={
