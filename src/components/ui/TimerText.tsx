@@ -5,9 +5,9 @@ interface TimerTextProps {
 
 export function TimerText({ value, label }: TimerTextProps) {
   return (
-    <div className="space-y-2 text-center">
-      {label ? <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">{label}</p> : null}
-      <p className="text-6xl font-semibold tracking-tight text-white sm:text-7xl">{value}</p>
+    <div className="space-y-3 text-center">
+      {label ? <p className="text-sm tracking-[0.32em] text-sky-300 uppercase font-medium">{label}</p> : null}
+      <p className="text-7xl font-bold tracking-tight text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.15)] sm:text-8xl">{value}</p>
     </div>
   );
 }
