@@ -13,7 +13,7 @@ export function InfoBlock({ description, tips }: InfoBlockProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="group flex w-full items-center gap-2 text-left"
+        className="group flex w-full items-center gap-2 text-left cursor-pointer"
       >
         <span
           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] transition-colors ${
@@ -25,7 +25,7 @@ export function InfoBlock({ description, tips }: InfoBlockProps) {
           ?
         </span>
         <span className="text-xs tracking-[0.2em] text-slate-500 uppercase group-hover:text-slate-300 transition-colors">
-          What is this?
+          Info & Tips
         </span>
       </button>
       {open ? (
