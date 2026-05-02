@@ -13,9 +13,12 @@ const TYPES: { value: TrainingType; label: string }[] = [
   { value: 'pattern', label: 'Breathing' },
 ];
 
+const PAGE_SIZE = 20;
+
 export function StatisticsView() {
   const { data } = useStatisticsQuery();
   const [selectedTypes, setSelectedTypes] = useState<TrainingType[]>([]);
+  const [page, setPage] = useState(1);
 
   if (!data) {
     return <div className="text-sm text-slate-500">Loading statistics…</div>;
@@ -77,8 +80,11 @@ export function StatisticsView() {
     setSelectedTypes((prev) =>
       prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
     );
+    setPage(1);
   };
   const filtered = isAll ? history : history.filter((entry) => selectedTypes.includes(entry.type));
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -175,7 +181,7 @@ export function StatisticsView() {
           })}
         </div>
         <div className="space-y-3">
-          {filtered.map((entry) => (
+          {paginated.map((entry) => (
             <details key={`${entry.type}-${entry.id}`} className="rounded-3xl bg-slate-950/45 px-4 py-3">
               <summary className="cursor-pointer list-none">
                 <div className="flex items-center justify-between gap-4">
@@ -191,6 +197,40 @@ export function StatisticsView() {
           ))}
           {filtered.length === 0 ? <EmptyState title="No session history" description="Saved sessions across all modes appear here." /> : null}
         </div>
+        {totalPages > 1 ? (
+          <div className="flex items-center justify-center gap-2">
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+              className="rounded-lg border border-white/10 bg-slate-950/45 px-3 py-1.5 text-xs text-slate-400 transition-colors hover:border-white/20 hover:text-white disabled:opacity-30 disabled:pointer-events-none"
+            >
+              Prev
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPage(p)}
+                className={`rounded-lg px-3 py-1.5 text-xs transition-colors ${
+                  p === page
+                    ? 'bg-sky-950/40 text-sky-300 border border-sky-300/40'
+                    : 'border border-white/10 bg-slate-950/45 text-slate-400 hover:border-white/20 hover:text-white'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+            <button
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+              className="rounded-lg border border-white/10 bg-slate-950/45 px-3 py-1.5 text-xs text-slate-400 transition-colors hover:border-white/20 hover:text-white disabled:opacity-30 disabled:pointer-events-none"
+            >
+              Next
+            </button>
+          </div>
+        ) : null}
       </Card>
     </div>
   );
