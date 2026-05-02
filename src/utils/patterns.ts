@@ -21,37 +21,11 @@ export const PRESET_PATTERNS: PatternPreset[] = [
     ],
   },
   {
-    name: 'Physiological Sigh',
-    description: 'Double inhale + long exhale. Resets autonomic state instantly.',
+    name: 'Cardiac Coherence',
+    description: '5-5 resonant breathing at 0.1 Hz for heart rate variability optimization.',
     phases: [
-      { name: 'Inhale', seconds: 1, kind: 'inhale' },
-      { name: 'Top Up', seconds: 1, kind: 'inhale' },
-      { name: 'Exhale', seconds: 6, kind: 'exhale' },
-    ],
-  },
-  {
-    name: 'Pursed Lip',
-    description: 'Short inhale, long exhale through pursed lips. Calming and controlled.',
-    phases: [
-      { name: 'Inhale', seconds: 2, kind: 'inhale' },
-      { name: 'Exhale', seconds: 4, kind: 'exhale' },
-    ],
-  },
-  {
-    name: '4-6',
-    description: 'Longer exhale activates the parasympathetic nervous system.',
-    phases: [
-      { name: 'Inhale', seconds: 4, kind: 'inhale' },
-      { name: 'Exhale', seconds: 6, kind: 'exhale' },
-    ],
-  },
-  {
-    name: '2-1-4',
-    description: 'Quick reset — short breath in, pause, long breath out.',
-    phases: [
-      { name: 'Inhale', seconds: 2, kind: 'inhale' },
-      { name: 'Hold', seconds: 1, kind: 'hold' },
-      { name: 'Exhale', seconds: 4, kind: 'exhale' },
+      { name: 'Inhale', seconds: 5, kind: 'inhale' },
+      { name: 'Exhale', seconds: 5, kind: 'exhale' },
     ],
   },
 ];
