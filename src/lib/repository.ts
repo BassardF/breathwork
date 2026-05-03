@@ -102,6 +102,27 @@ export async function fetchBreathHolds(
   return data;
 }
 
+export async function deleteBreathHold(
+  session: Session | null,
+  id: string,
+) {
+  if (!supabase || !session) {
+    const entries = readLocal<BreathHoldEntry>(BREATH_HOLDS_KEY);
+    writeLocal(
+      BREATH_HOLDS_KEY,
+      entries.filter((e) => e.id !== id),
+    );
+    return;
+  }
+
+  const client = supabase as any;
+  const { error } = await client.from('breath_holds').delete().eq('id', id);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function saveBreathHold(
   session: Session | null,
   durationSeconds: number,

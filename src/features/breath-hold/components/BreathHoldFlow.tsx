@@ -1,23 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { CircleAnimation } from '../../../components/ui/CircleAnimation';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { InfoBlock } from '../../../components/ui/InfoBlock';
 import { TimerText } from '../../../components/ui/TimerText';
 import { useTimer } from '../../../hooks/useTimer';
 import { useWakeLock } from '../../../hooks/useWakeLock';
 import { useSessionStore } from '../../../stores/sessionStore';
 import { formatClock, formatDurationPrecise } from '../../../utils/formatTime';
-import { useBreathHoldsQuery, useSaveBreathHoldMutation } from '../queries';
+import { useBreathHoldsQuery, useDeleteBreathHoldMutation, useSaveBreathHoldMutation } from '../queries';
 
 const READY_SECONDS = 10;
 
 export function BreathHoldFlow() {
   const { data: holds = [] } = useBreathHoldsQuery();
   const saveMutation = useSaveBreathHoldMutation();
+  const deleteMutation = useDeleteBreathHoldMutation();
   const [stage, setStage] = useState<'idle' | 'countdown' | 'holding' | 'finished'>('idle');
   const [lastResult, setLastResult] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const bestResult = holds[0]?.duration_seconds ?? 0;
   const isNewRecord = lastResult !== null && lastResult >= bestResult;
   const startSession = useSessionStore((state) => state.startSession);
@@ -142,15 +146,38 @@ export function BreathHoldFlow() {
               key={entry.id}
               className={`flex items-center justify-between rounded-3xl border px-4 py-3 ${entry.isCurrent ? 'border-sky-300/30 bg-sky-300/10' : 'border-white/6 bg-slate-950/45'}`}
             >
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="text-xs tracking-[0.2em] text-slate-500 uppercase">#{entry.rank}</p>
                 <p className="mt-1 text-lg font-medium text-white">{formatClock(entry.duration_seconds)}</p>
               </div>
-              <p className="text-sm text-slate-400">{new Date(entry.recorded_at).toLocaleDateString()}</p>
+              <div className="flex items-center gap-3 shrink-0">
+                <p className="text-sm text-slate-400">{new Date(entry.recorded_at).toLocaleDateString()}</p>
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(entry.id)}
+                  className="text-slate-600 hover:text-rose-400 transition-colors"
+                  aria-label="Delete entry"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           ))}
           {leaderboard.length === 0 ? <p className="text-sm text-slate-500">No recorded holds yet.</p> : null}
         </div>
+        <ConfirmModal
+          open={deleteTarget !== null}
+          title="Delete entry"
+          message="This will permanently remove this breath hold record. Are you sure?"
+          confirmLabel="Delete"
+          onConfirm={() => {
+            if (deleteTarget) {
+              void deleteMutation.mutateAsync(deleteTarget);
+            }
+            setDeleteTarget(null);
+          }}
+          onCancel={() => setDeleteTarget(null)}
+        />
       </Card>
     </div>
   );
