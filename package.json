@@ -10,6 +10,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -23,9 +25,9 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
+    "@tailwindcss/vite": "^4.1.7",
     "@tanstack/react-query": "^5.80.2",
     "@tanstack/react-query-devtools": "^5.80.2",
-    "@tailwindcss/vite": "^4.1.7",
     "immer": "^10.1.1",
     "lucide-react": "^0.511.0",
     "react": "^18.3.1",
@@ -36,6 +38,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
+    "@playwright/test": "^1.59.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
