@@ -152,7 +152,10 @@ export function O2TableFlow() {
           </div>
         ) : phase === 'complete' ? (
           <div className="space-y-4">
-            <TimerText value="Complete" label="Session summary" />
+            <div className="space-y-3 text-center">
+              <p className="text-sm tracking-[0.32em] text-sky-300 uppercase font-medium">Session summary</p>
+              <p className="text-4xl font-semibold tracking-tight text-white">Complete</p>
+            </div>
             <p className="text-center text-sm text-slate-400">All 8 rounds finished. Session saved.</p>
             <Button fullWidth onClick={() => setPhase('setup')}>
               Build another table
@@ -168,6 +171,7 @@ export function O2TableFlow() {
               fullWidth
               variant="secondary"
               onClick={() => {
+                resetTimer();
                 setPhase('complete');
                 updateSession({ phase: 'complete', isRunning: false });
                 clearSession();
