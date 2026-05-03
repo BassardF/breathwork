@@ -45,7 +45,7 @@ export function LearnOverview() {
           <button
             type="button"
             onClick={() => setActiveGoal(ALL_GOAL)}
-            className={`rounded-full px-4 py-2 text-xs font-medium transition-colors ${
+            className={`rounded-full px-4 py-2 text-xs font-medium transition-colors cursor-pointer ${
               activeGoal === ALL_GOAL
                 ? 'bg-sky-200 text-slate-950'
                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
@@ -55,10 +55,9 @@ export function LearnOverview() {
           </button>
           {GOALS.map((goal) => (
             <button
-              key={goal.goalId}
               type="button"
               onClick={() => setActiveGoal(goal.goalId)}
-              className={`rounded-full px-4 py-2 text-xs font-medium transition-colors ${
+              className={`rounded-full px-4 py-2 text-xs font-medium transition-colors cursor-pointer ${
                 activeGoal === goal.goalId
                   ? 'bg-sky-200 text-slate-950'
                   : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'

@@ -155,7 +155,7 @@ export function BreathHoldFlow() {
                 <button
                   type="button"
                   onClick={() => setDeleteTarget(entry.id)}
-                  className="text-slate-600 hover:text-rose-400 transition-colors"
+                  className="text-slate-600 hover:text-rose-400 transition-colors cursor-pointer"
                   aria-label="Delete entry"
                 >
                   <Trash2 className="h-4 w-4" />

@@ -151,10 +151,10 @@ export function StatisticsView() {
           <span className="shrink-0 text-sm text-slate-500">{filtered.length} sessions</span>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
+           <button
             type="button"
             onClick={() => setSelectedTypes([])}
-            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+            className={`rounded-full border px-3 py-1 text-xs transition-colors cursor-pointer ${
               isAll
                 ? 'border-sky-300/40 bg-sky-950/40 text-sky-300'
                 : 'border-white/10 bg-slate-950/45 text-slate-400 hover:border-white/20'
@@ -169,7 +169,7 @@ export function StatisticsView() {
                 key={t.value}
                 type="button"
                 onClick={() => toggleType(t.value)}
-                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                className={`rounded-full border px-3 py-1 text-xs transition-colors cursor-pointer ${
                   active
                     ? 'border-sky-300/40 bg-sky-950/40 text-sky-300'
                     : 'border-white/10 bg-slate-950/45 text-slate-400 hover:border-white/20'
@@ -203,7 +203,7 @@ export function StatisticsView() {
               type="button"
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
-              className="rounded-lg border border-white/10 bg-slate-950/45 px-3 py-1.5 text-xs text-slate-400 transition-colors hover:border-white/20 hover:text-white disabled:opacity-30 disabled:pointer-events-none"
+              className="rounded-lg border border-white/10 bg-slate-950/45 px-3 py-1.5 text-xs text-slate-400 transition-colors cursor-pointer hover:border-white/20 hover:text-white disabled:opacity-30 disabled:pointer-events-none"
             >
               Prev
             </button>
@@ -212,7 +212,7 @@ export function StatisticsView() {
                 key={p}
                 type="button"
                 onClick={() => setPage(p)}
-                className={`rounded-lg px-3 py-1.5 text-xs transition-colors ${
+                className={`rounded-lg px-3 py-1.5 text-xs transition-colors cursor-pointer ${
                   p === page
                     ? 'bg-sky-950/40 text-sky-300 border border-sky-300/40'
                     : 'border border-white/10 bg-slate-950/45 text-slate-400 hover:border-white/20 hover:text-white'
@@ -225,7 +225,7 @@ export function StatisticsView() {
               type="button"
               disabled={page >= totalPages}
               onClick={() => setPage((p) => p + 1)}
-              className="rounded-lg border border-white/10 bg-slate-950/45 px-3 py-1.5 text-xs text-slate-400 transition-colors hover:border-white/20 hover:text-white disabled:opacity-30 disabled:pointer-events-none"
+              className="rounded-lg border border-white/10 bg-slate-950/45 px-3 py-1.5 text-xs text-slate-400 transition-colors cursor-pointer hover:border-white/20 hover:text-white disabled:opacity-30 disabled:pointer-events-none"
             >
               Next
             </button>

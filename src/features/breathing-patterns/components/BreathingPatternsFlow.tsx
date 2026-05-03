@@ -187,15 +187,15 @@ export function BreathingPatternsFlow() {
                       setIsCustomPattern(false);
                       setPatternNameInput(preset.name);
                     }}
-                    className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors ${
-                      isSelected
-                        ? 'border-sky-300/40 bg-sky-950/40'
-                        : 'border-white/8 bg-slate-950/45 hover:border-white/20'
-                    }`}
-                  >
-                    <span
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-                        isSelected ? 'border-sky-300 bg-sky-300/20' : 'border-slate-600'
+                      className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors cursor-pointer ${
+                       isSelected
+                         ? 'border-sky-300/40 bg-sky-950/40'
+                         : 'border-white/8 bg-slate-950/45 hover:border-white/20'
+                     }`}
+                   >
+                     <span
+                       className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                         isSelected ? 'border-sky-300 bg-sky-300/20' : 'border-slate-600'
                       }`}
                     >
                       {isSelected ? <span className="h-2.5 w-2.5 rounded-full bg-sky-300" /> : null}
@@ -218,7 +218,7 @@ export function BreathingPatternsFlow() {
                   ]);
                   setIsCustomPattern(true);
                 }}
-                className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors ${
+                className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors cursor-pointer ${
                   isCustomPattern
                     ? 'border-sky-300/40 bg-sky-950/40'
                     : 'border-dashed border-white/15 bg-slate-950/30 hover:border-white/30'
@@ -279,7 +279,7 @@ export function BreathingPatternsFlow() {
                       <span className="text-xs tracking-[0.2em] text-slate-500 uppercase">Phase {index + 1}</span>
                       <button
                         type="button"
-                        className="text-xs text-rose-400/70 hover:text-rose-300 transition-colors"
+                        className="text-xs text-rose-400/70 hover:text-rose-300 transition-colors cursor-pointer"
                         onClick={() => setPhases((value) => value.filter((_, entryIndex) => entryIndex !== index))}
                       >
                         Remove

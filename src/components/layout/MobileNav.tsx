@@ -21,7 +21,7 @@ export function MobileNav({ installPrompt, onInstall }: MobileNavProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="p-2 text-slate-400 hover:text-slate-200 lg:hidden"
+        className="p-2 text-slate-400 hover:text-slate-200 lg:hidden cursor-pointer"
         aria-label="Open navigation"
       >
         <Menu className="h-5 w-5" />
@@ -45,7 +45,7 @@ export function MobileNav({ installPrompt, onInstall }: MobileNavProps) {
           </p>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-1 text-slate-400 hover:text-slate-200"
+            className="p-1 text-slate-400 hover:text-slate-200 cursor-pointer"
             aria-label="Close navigation"
           >
             <X className="h-4 w-4" />
