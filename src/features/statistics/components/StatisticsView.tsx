@@ -29,6 +29,14 @@ export function StatisticsView() {
   const bestO2 = [...data.o2Sessions].sort((a, b) => b.completed_rounds - a.completed_rounds)[0];
   const bestPattern = [...data.breathingSessions].sort((a, b) => b.cycles_completed - a.cycles_completed)[0];
 
+  const allWithHr = [
+    ...data.breathHolds.filter((e) => e.avg_heart_rate).map((e) => ({ hr: e.avg_heart_rate!, date: e.recorded_at, type: 'hold' as const })),
+    ...data.co2Sessions.filter((e) => e.avg_heart_rate).map((e) => ({ hr: e.avg_heart_rate!, date: e.completed_at, type: 'co2' as const })),
+    ...data.o2Sessions.filter((e) => e.avg_heart_rate).map((e) => ({ hr: e.avg_heart_rate!, date: e.completed_at, type: 'o2' as const })),
+    ...data.breathingSessions.filter((e) => e.avg_heart_rate).map((e) => ({ hr: e.avg_heart_rate!, date: e.completed_at, type: 'pattern' as const })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const latestHr = allWithHr[0];
+
   const holdProgress = [...data.breathHolds]
     .reverse()
     .map((entry) => ({
@@ -50,28 +58,28 @@ export function StatisticsView() {
       type: 'breath-hold' as const,
       timestamp: entry.recorded_at,
       label: 'Max Breath Hold',
-      detail: formatClock(entry.duration_seconds),
+      detail: `${formatClock(entry.duration_seconds)}${entry.avg_heart_rate ? ` · Avg HR ${entry.avg_heart_rate}` : ''}`,
     })),
     ...data.co2Sessions.map((entry) => ({
       id: entry.id,
       type: 'co2' as const,
       timestamp: entry.completed_at,
       label: 'CO2 Table',
-      detail: `${entry.completed_rounds}/8 rounds`,
+      detail: `${entry.completed_rounds}/8 rounds${entry.avg_heart_rate ? ` · Avg HR ${entry.avg_heart_rate}` : ''}`,
     })),
     ...data.o2Sessions.map((entry) => ({
       id: entry.id,
       type: 'o2' as const,
       timestamp: entry.completed_at,
       label: 'O2 Table',
-      detail: `${entry.completed_rounds}/8 rounds`,
+      detail: `${entry.completed_rounds}/8 rounds${entry.avg_heart_rate ? ` · Avg HR ${entry.avg_heart_rate}` : ''}`,
     })),
     ...data.breathingSessions.map((entry) => ({
       id: entry.id,
       type: 'pattern' as const,
       timestamp: entry.completed_at,
       label: entry.pattern_name,
-      detail: `${entry.cycles_completed} cycles`,
+      detail: `${entry.cycles_completed} cycles${entry.avg_heart_rate ? ` · Avg HR ${entry.avg_heart_rate}` : ''}`,
     })),
   ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
@@ -88,7 +96,7 @@ export function StatisticsView() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-4">
         <Card className="space-y-2">
           <p className="text-xs tracking-[0.24em] text-slate-500 uppercase">Breath Hold PB</p>
           <p className="text-4xl font-semibold text-white">{bestHold ? formatClock(bestHold.duration_seconds) : '--:--'}</p>
@@ -105,6 +113,11 @@ export function StatisticsView() {
           <p className="text-xs tracking-[0.24em] text-slate-500 uppercase">Breathing Cycles</p>
           <p className="text-4xl font-semibold text-white">{bestPattern?.cycles_completed ?? 0}</p>
           <p className="text-sm text-slate-400">{bestPattern?.pattern_name ?? 'No data yet'}</p>
+        </Card>
+        <Card className="space-y-2">
+          <p className="text-xs tracking-[0.24em] text-slate-500 uppercase">Heart Rate</p>
+          <p className="text-4xl font-semibold text-white">{latestHr ? `${latestHr.hr}` : '--'}</p>
+          <p className="text-sm text-slate-400">{latestHr ? `${latestHr.date ? new Date(latestHr.date).toLocaleDateString() : ''} avg` : 'No data yet'}</p>
         </Card>
       </div>
 

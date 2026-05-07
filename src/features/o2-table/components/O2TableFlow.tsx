@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../../../components/ui/Button';
+import { BpmIndicator } from '../../../components/ui/BpmIndicator';
 import { Card } from '../../../components/ui/Card';
 import { CircleAnimation } from '../../../components/ui/CircleAnimation';
 import { InfoBlock } from '../../../components/ui/InfoBlock';
 import { TimerText } from '../../../components/ui/TimerText';
+import { useHeartRateRecorder } from '../../../hooks/useHeartRateRecorder';
 import { useTimer } from '../../../hooks/useTimer';
 import { useWakeLock } from '../../../hooks/useWakeLock';
 import { useSessionStore } from '../../../stores/sessionStore';
@@ -25,6 +27,7 @@ export function O2TableFlow() {
   const startSession = useSessionStore((state) => state.startSession);
   const updateSession = useSessionStore((state) => state.updateSession);
   const clearSession = useSessionStore((state) => state.clearSession);
+  const recorder = useHeartRateRecorder(phase === 'rest' || phase === 'hold');
 
   const rounds = useMemo(() => buildO2Table({ pbSeconds: pb, restSeconds, maxHoldPct, startHoldPct }), [maxHoldPct, pb, restSeconds, startHoldPct]);
   const currentRound = rounds[roundIndex];
@@ -38,12 +41,15 @@ export function O2TableFlow() {
       } else if (roundIndex === rounds.length - 1) {
         setPhase('complete');
         updateSession({ phase: 'complete', isRunning: false });
+        const avgHr = recorder.getAverage();
+        recorder.reset();
         clearSession();
         void saveMutation.mutateAsync({
           pb_used_seconds: pb,
           rest_duration_seconds: restSeconds,
           max_hold_pct: maxHoldPct,
           completed_rounds: rounds.length,
+          avg_heart_rate: avgHr ?? undefined,
         });
       } else {
         setRoundIndex((value) => value + 1);
@@ -164,9 +170,10 @@ export function O2TableFlow() {
         ) : (
           <div className="space-y-4">
             <TimerText value={formatClock(timerSeconds)} label={`${phase} phase`} />
-            <p className="text-center text-sm text-slate-400">
-              Round {roundIndex + 1} of 8
-            </p>
+            <div className="flex items-center justify-center gap-2 text-center text-sm text-slate-400">
+              <span>Round {roundIndex + 1} of 8</span>
+              <BpmIndicator />
+            </div>
             <Button
               fullWidth
               variant="secondary"
@@ -174,12 +181,15 @@ export function O2TableFlow() {
                 resetTimer();
                 setPhase('complete');
                 updateSession({ phase: 'complete', isRunning: false });
+                const avgHr = recorder.getAverage();
+                recorder.reset();
                 clearSession();
                 void saveMutation.mutateAsync({
                   pb_used_seconds: pb,
                   rest_duration_seconds: restSeconds,
                   max_hold_pct: maxHoldPct,
                   completed_rounds: roundIndex,
+                  avg_heart_rate: avgHr ?? undefined,
                 });
               }}
             >
@@ -190,8 +200,8 @@ export function O2TableFlow() {
       </Card>
 
       <Card className="space-y-4">
-        <h3 className="text-xl font-semibold text-white">Preview</h3>
         <div className="space-y-2">
+          <h3 className="text-xl font-semibold text-white">Preview</h3>
           {rounds.map((round, index) => {
             const isDone = index < roundIndex && (phase !== 'setup' && phase !== 'complete');
             const isCurrent = index === roundIndex && phase !== 'setup' && phase !== 'complete';

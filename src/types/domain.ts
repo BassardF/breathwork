@@ -7,6 +7,7 @@ export interface BreathHoldEntry {
   user_id: string;
   duration_seconds: number;
   recorded_at: string;
+  avg_heart_rate?: number;
 }
 
 export interface Co2Session {
@@ -16,6 +17,7 @@ export interface Co2Session {
   hold_pct: number;
   completed_rounds: number;
   completed_at: string;
+  avg_heart_rate?: number;
 }
 
 export interface O2Session {
@@ -26,6 +28,7 @@ export interface O2Session {
   max_hold_pct: number;
   completed_rounds: number;
   completed_at: string;
+  avg_heart_rate?: number;
 }
 
 export interface BreathingPhase {
@@ -42,6 +45,7 @@ export interface BreathingSession {
   total_duration_seconds: number;
   cycles_completed: number;
   completed_at: string;
+  avg_heart_rate?: number;
 }
 
 export interface CustomPattern {

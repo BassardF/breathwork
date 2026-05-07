@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../../../components/ui/Button';
+import { BpmIndicator } from '../../../components/ui/BpmIndicator';
 import { Card } from '../../../components/ui/Card';
 import { CircleAnimation } from '../../../components/ui/CircleAnimation';
 import { TimerText } from '../../../components/ui/TimerText';
+import { useHeartRateRecorder } from '../../../hooks/useHeartRateRecorder';
 import { useTimer } from '../../../hooks/useTimer';
 import { useWakeLock } from '../../../hooks/useWakeLock';
 import type { BreathingPhase } from '../../../types/domain';
@@ -60,6 +62,7 @@ export function BreathingPatternsFlow() {
   const currentPhase = phases[phaseIndex];
   const validationError = validatePattern(phases);
   const canStart = !validationError && totalCycles > 0;
+  const recorder = useHeartRateRecorder(status === 'running');
 
   const timer = useTimer({
     direction: 'down',
@@ -69,11 +72,13 @@ export function BreathingPatternsFlow() {
         if (cycleIndex >= totalCycles - 1) {
           setStatus('complete');
           sound.sessionComplete();
+          const avgHr = recorder.getAverage();
           void saveSessionMutation.mutateAsync({
             pattern_name: isCustomPattern ? patternNameInput || 'Custom Pattern' : selectedName,
             phases,
             total_duration_seconds: totalDurationSeconds,
             cycles_completed: totalCycles,
+            avg_heart_rate: avgHr ?? undefined,
           });
           return;
         }
@@ -127,28 +132,34 @@ export function BreathingPatternsFlow() {
         {status === 'running' && currentPhase ? (
           <div className="space-y-4">
             <TimerText value={formatClock(timerSeconds)} label={currentPhase.name} />
-            <p className="text-center text-sm text-slate-400">
-              Cycle {cycleIndex + 1} of {totalCycles} · {formatClock(cycleSeconds)} per cycle
-            </p>
+            <div className="flex items-center justify-center gap-2 text-center text-sm text-slate-400">
+              <span>Cycle {cycleIndex + 1} of {totalCycles}</span>
+              <BpmIndicator />
+            </div>
             <Button
               fullWidth
               variant="secondary"
-              onClick={() => {
-                setStatus('complete');
-                void saveSessionMutation.mutateAsync({
-                  pattern_name: isCustomPattern ? patternNameInput || 'Custom Pattern' : selectedName,
-                  phases,
-                  total_duration_seconds: totalDurationSeconds,
-                  cycles_completed: cycleIndex,
-                });
-              }}
+                onClick={() => {
+                  setStatus('complete');
+                  const avgHr = recorder.getAverage();
+                  void saveSessionMutation.mutateAsync({
+                    pattern_name: isCustomPattern ? patternNameInput || 'Custom Pattern' : selectedName,
+                    phases,
+                    total_duration_seconds: totalDurationSeconds,
+                    cycles_completed: cycleIndex,
+                    avg_heart_rate: avgHr ?? undefined,
+                  });
+                }}
             >
               End session
             </Button>
           </div>
         ) : status === 'complete' ? (
           <div className="space-y-4">
-            <TimerText value="Complete" label="Session saved" />
+            <div className="space-y-3 text-center">
+              <p className="text-sm tracking-[0.32em] text-sky-300 uppercase font-medium">Session saved</p>
+              <p className="text-4xl font-semibold tracking-tight text-white">Complete</p>
+            </div>
             {isCustomPattern ? (
               <div className="space-y-3">
                 <input
@@ -360,6 +371,7 @@ export function BreathingPatternsFlow() {
               fullWidth
               disabled={!canStart}
               onClick={() => {
+                recorder.reset();
                 sound.sessionStart();
                 setAnimationPhase('hold-empty');
                 setPhaseIndex(0);
@@ -383,8 +395,8 @@ export function BreathingPatternsFlow() {
       </Card>
 
       <Card className="space-y-4">
-        <h3 className="text-xl font-semibold text-white">Preview</h3>
-        <p className="text-sm text-slate-400">
+          <h3 className="text-xl font-semibold text-white">Preview</h3>
+          <p className="text-sm text-slate-400">
           {formatClock(cycleSeconds)} per cycle · {totalCycles} full cycles fit into {formatClock(totalDurationSeconds)}.
         </p>
         <div className="space-y-2">

@@ -6,6 +6,7 @@ import { BreathHoldFlow } from './features/breath-hold/components/BreathHoldFlow
 import { Co2TableFlow } from './features/co2-table/components/Co2TableFlow';
 import { O2TableFlow } from './features/o2-table/components/O2TableFlow';
 import { BreathingPatternsFlow } from './features/breathing-patterns/components/BreathingPatternsFlow';
+import { SettingsFlow } from './features/settings/components/SettingsFlow';
 import { StatisticsView } from './features/statistics/components/StatisticsView';
 import { LearnOverview } from './features/learn/components/LearnOverview';
 
@@ -81,6 +82,19 @@ function PatternsPage() {
   );
 }
 
+function SettingsPage() {
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Configuration"
+        title="Settings"
+        description="Bluetooth HR monitor pairing, device management, and live heart rate display."
+      />
+      <SettingsFlow />
+    </div>
+  );
+}
+
 function StatsPage() {
   return (
     <div className="space-y-6">
@@ -116,6 +130,7 @@ export function App() {
           <Route path="/co2" element={<Co2Page />} />
           <Route path="/o2" element={<O2Page />} />
           <Route path="/patterns" element={<PatternsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/learn" element={<LearnPage />} />
         </Route>

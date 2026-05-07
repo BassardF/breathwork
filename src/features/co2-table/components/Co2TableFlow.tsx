@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '../../../components/ui/Button';
+import { BpmIndicator } from '../../../components/ui/BpmIndicator';
 import { Card } from '../../../components/ui/Card';
 import { CircleAnimation } from '../../../components/ui/CircleAnimation';
 import { InfoBlock } from '../../../components/ui/InfoBlock';
 import { TimerText } from '../../../components/ui/TimerText';
+import { useHeartRateRecorder } from '../../../hooks/useHeartRateRecorder';
 import { useTimer } from '../../../hooks/useTimer';
 import { useWakeLock } from '../../../hooks/useWakeLock';
 import { useSessionStore } from '../../../stores/sessionStore';
@@ -36,6 +38,7 @@ export function Co2TableFlow() {
   const startSession = useSessionStore((state) => state.startSession);
   const updateSession = useSessionStore((state) => state.updateSession);
   const clearSession = useSessionStore((state) => state.clearSession);
+  const recorder = useHeartRateRecorder(phase === 'rest' || phase === 'hold');
 
   const rounds = useMemo(() => buildCo2Table({ pbSeconds: pb, holdPct, startRestSeconds, restDecrementSeconds: restDecrement }), [holdPct, pb, restDecrement, startRestSeconds]);
   const currentRound = rounds[roundIndex];
@@ -49,11 +52,14 @@ export function Co2TableFlow() {
       } else if (roundIndex === rounds.length - 1) {
         setPhase('complete');
         updateSession({ phase: 'complete', isRunning: false });
+        const avgHr = recorder.getAverage();
         void saveMutation.mutateAsync({
           pb_used_seconds: pb,
           hold_pct: holdPct,
           completed_rounds: rounds.length,
+          avg_heart_rate: avgHr ?? undefined,
         });
+        recorder.reset();
         clearSession();
       } else {
         const nextRound = roundIndex + 1;
@@ -172,20 +178,24 @@ export function Co2TableFlow() {
         ) : (
           <div className="space-y-4">
             <TimerText value={formatClock(timerSeconds)} label={`${phase} phase`} />
-            <p className="text-center text-sm text-slate-400">
-              Round {roundIndex + 1} of 8
-            </p>
+            <div className="flex items-center justify-center gap-2 text-center text-sm text-slate-400">
+              <span>Round {roundIndex + 1} of 8</span>
+              <BpmIndicator />
+            </div>
             <Button
               fullWidth
               variant="secondary"
               onClick={() => {
                 resetTimer();
                 setPhase('complete');
+                const avgHr = recorder.getAverage();
+                recorder.reset();
                 clearSession();
                 void saveMutation.mutateAsync({
                   pb_used_seconds: pb,
                   hold_pct: holdPct,
                   completed_rounds: roundIndex,
+                  avg_heart_rate: avgHr ?? undefined,
                 });
               }}
             >
@@ -196,8 +206,8 @@ export function Co2TableFlow() {
       </Card>
 
       <Card className="space-y-4">
-        <h3 className="text-xl font-semibold text-white">Preview</h3>
         <div className="space-y-2">
+          <h3 className="text-xl font-semibold text-white">Preview</h3>
           {rounds.map((round, index) => {
             const isDone = index < roundIndex && (phase !== 'setup' && phase !== 'complete');
             const isCurrent = index === roundIndex && phase !== 'setup' && phase !== 'complete';

@@ -126,6 +126,7 @@ export async function deleteBreathHold(
 export async function saveBreathHold(
   session: Session | null,
   durationSeconds: number,
+  avg_heart_rate?: number,
 ) {
   if (!supabase || !session) {
     const nextEntry: BreathHoldEntry = {
@@ -133,6 +134,7 @@ export async function saveBreathHold(
       user_id: requireUser(session?.user ?? null),
       duration_seconds: durationSeconds,
       recorded_at: new Date().toISOString(),
+      ...(avg_heart_rate !== undefined ? { avg_heart_rate } : {}),
     };
     const entries = [
       nextEntry,
@@ -148,6 +150,7 @@ export async function saveBreathHold(
     .insert({
       user_id: session.user.id,
       duration_seconds: durationSeconds,
+      ...(avg_heart_rate !== undefined ? { avg_heart_rate } : {}),
     })
     .select()
     .single();
@@ -182,7 +185,7 @@ export async function saveCo2Session(
   payload: Pick<
     Co2Session,
     'pb_used_seconds' | 'hold_pct' | 'completed_rounds'
-  >,
+  > & { avg_heart_rate?: number },
 ) {
   if (!supabase || !session) {
     const nextEntry: Co2Session = {
@@ -203,6 +206,7 @@ export async function saveCo2Session(
     .insert({
       user_id: session.user.id,
       ...payload,
+      ...(payload.avg_heart_rate !== undefined ? { avg_heart_rate: payload.avg_heart_rate } : {}),
     })
     .select()
     .single();
@@ -238,7 +242,7 @@ export async function saveO2Session(
     | 'rest_duration_seconds'
     | 'max_hold_pct'
     | 'completed_rounds'
-  >,
+  > & { avg_heart_rate?: number },
 ) {
   if (!supabase || !session) {
     const nextEntry: O2Session = {
@@ -259,6 +263,7 @@ export async function saveO2Session(
     .insert({
       user_id: session.user.id,
       ...payload,
+      ...(payload.avg_heart_rate !== undefined ? { avg_heart_rate: payload.avg_heart_rate } : {}),
     })
     .select()
     .single();
@@ -298,7 +303,7 @@ export async function saveBreathingSession(
   payload: Pick<
     BreathingSession,
     'pattern_name' | 'phases' | 'total_duration_seconds' | 'cycles_completed'
-  >,
+  > & { avg_heart_rate?: number },
 ) {
   if (!supabase || !session) {
     const nextEntry: BreathingSession = {
@@ -319,6 +324,7 @@ export async function saveBreathingSession(
     .insert({
       user_id: session.user.id,
       ...payload,
+      ...(payload.avg_heart_rate !== undefined ? { avg_heart_rate: payload.avg_heart_rate } : {}),
     })
     .select()
     .single();

@@ -11,6 +11,8 @@ import { useTimer } from '../../../hooks/useTimer';
 import { useWakeLock } from '../../../hooks/useWakeLock';
 import { useSessionStore } from '../../../stores/sessionStore';
 import { formatClock, formatDurationPrecise } from '../../../utils/formatTime';
+import { BpmIndicator } from '../../../components/ui/BpmIndicator';
+import { useHeartRateRecorder } from '../../../hooks/useHeartRateRecorder';
 import { useBreathHoldsQuery, useDeleteBreathHoldMutation, useSaveBreathHoldMutation } from '../queries';
 
 const READY_SECONDS = 10;
@@ -24,6 +26,7 @@ export function BreathHoldFlow() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const bestResult = holds[0]?.duration_seconds ?? 0;
   const isNewRecord = lastResult !== null && lastResult >= bestResult;
+  const recorder = useHeartRateRecorder(stage === 'countdown' || stage === 'holding');
   const startSession = useSessionStore((state) => state.startSession);
   const updateSession = useSessionStore((state) => state.updateSession);
   const clearSession = useSessionStore((state) => state.clearSession);
@@ -87,7 +90,9 @@ export function BreathHoldFlow() {
     setLastResult(seconds);
     setStage('finished');
     updateSession({ phase: 'complete', isRunning: false });
-    await saveMutation.mutateAsync(seconds);
+    const avgHr = recorder.getAverage();
+    await saveMutation.mutateAsync({ durationSeconds: seconds, avg_heart_rate: avgHr ?? undefined });
+    recorder.reset();
     clearSession();
   };
 
@@ -113,9 +118,15 @@ export function BreathHoldFlow() {
         />
         <CircleAnimation phase={stage === 'countdown' ? 'rest' : stage === 'holding' ? 'hold' : 'idle'} intensity={1.4} />
         {stage === 'countdown' ? (
-          <TimerText value={formatClock(countdownSeconds)} label="Get ready" />
+          <div className="space-y-4">
+            <TimerText value={formatClock(countdownSeconds)} label="Get ready" />
+            <div className="flex justify-center"><BpmIndicator /></div>
+          </div>
         ) : (
-          <TimerText value={formatDurationPrecise(holdElapsedMs)} label={stage === 'holding' ? 'Holding' : 'Timer'} />
+          <div className="space-y-4">
+            <TimerText value={formatDurationPrecise(holdElapsedMs)} label={stage === 'holding' ? 'Holding' : 'Timer'} />
+            {stage === 'holding' ? <div className="flex justify-center"><BpmIndicator /></div> : null}
+          </div>
         )}
         <div className="flex gap-3">
           {stage === 'idle' || stage === 'finished' ? (
@@ -138,7 +149,9 @@ export function BreathHoldFlow() {
       <Card className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-semibold text-white">Leaderboard</h3>
-          <span className="text-sm text-slate-500">{holds.length} entries</span>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-slate-500">{holds.length} entries</span>
+          </div>
         </div>
         <div className="space-y-3">
           {leaderboard.map((entry) => (
@@ -148,7 +161,12 @@ export function BreathHoldFlow() {
             >
               <div className="min-w-0 flex-1">
                 <p className="text-xs tracking-[0.2em] text-slate-500 uppercase">#{entry.rank}</p>
-                <p className="mt-1 text-lg font-medium text-white">{formatClock(entry.duration_seconds)}</p>
+                <p className="mt-1 text-lg font-medium text-white">
+                  {formatClock(entry.duration_seconds)}
+                  {entry.avg_heart_rate ? (
+                    <span className="ml-2 text-sm font-normal text-slate-400">· {entry.avg_heart_rate} bpm</span>
+                  ) : null}
+                </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <p className="text-sm text-slate-400">{new Date(entry.recorded_at).toLocaleDateString()}</p>

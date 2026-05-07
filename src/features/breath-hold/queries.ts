@@ -11,7 +11,8 @@ export function useBreathHoldsQuery() {
 export function useSaveBreathHoldMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (durationSeconds: number) => saveBreathHold(await getSession(), durationSeconds),
+    mutationFn: async ({ durationSeconds, avg_heart_rate }: { durationSeconds: number; avg_heart_rate?: number }) =>
+      saveBreathHold(await getSession(), durationSeconds, avg_heart_rate),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['breath-holds'] });
     },

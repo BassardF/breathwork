@@ -7,12 +7,14 @@ export interface Database {
           user_id: string;
           duration_seconds: number;
           recorded_at: string;
+          avg_heart_rate?: number;
         };
         Insert: {
           id?: string;
           user_id: string;
           duration_seconds: number;
           recorded_at?: string;
+          avg_heart_rate?: number;
         };
       };
       co2_sessions: {
@@ -23,6 +25,7 @@ export interface Database {
           hold_pct: number;
           completed_rounds: number;
           completed_at: string;
+          avg_heart_rate?: number;
         };
         Insert: {
           id?: string;
@@ -31,6 +34,7 @@ export interface Database {
           hold_pct: number;
           completed_rounds: number;
           completed_at?: string;
+          avg_heart_rate?: number;
         };
       };
       o2_sessions: {
@@ -42,6 +46,7 @@ export interface Database {
           max_hold_pct: number;
           completed_rounds: number;
           completed_at: string;
+          avg_heart_rate?: number;
         };
         Insert: {
           id?: string;
@@ -51,6 +56,7 @@ export interface Database {
           max_hold_pct: number;
           completed_rounds: number;
           completed_at?: string;
+          avg_heart_rate?: number;
         };
       };
       breathing_sessions: {
@@ -62,6 +68,7 @@ export interface Database {
           total_duration_seconds: number;
           cycles_completed: number;
           completed_at: string;
+          avg_heart_rate?: number;
         };
         Insert: {
           id?: string;
@@ -71,6 +78,7 @@ export interface Database {
           total_duration_seconds: number;
           cycles_completed: number;
           completed_at?: string;
+          avg_heart_rate?: number;
         };
       };
       custom_patterns: {

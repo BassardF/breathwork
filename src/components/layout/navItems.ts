@@ -1,4 +1,4 @@
-import { BarChart3, BookHeart, HeartPulse, MoonStar, Timer, Wind } from 'lucide-react';
+import { BarChart3, BookHeart, HeartPulse, MoonStar, Settings, Timer, Wind } from 'lucide-react';
 
 export const navItems = [
   { to: '/', label: 'Hold', icon: Timer },
@@ -7,4 +7,5 @@ export const navItems = [
   { to: '/patterns', label: 'Breathe', icon: Wind },
   { to: '/learn', label: 'Learn', icon: BookHeart },
   { to: '/stats', label: 'Stats', icon: BarChart3 },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ] as const;

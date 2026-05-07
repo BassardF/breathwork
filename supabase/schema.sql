@@ -64,3 +64,8 @@ create policy "breathing_sessions own rows" on public.breathing_sessions
 
 create policy "custom_patterns own rows" on public.custom_patterns
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+alter table public.breath_holds add column if not exists avg_heart_rate int;
+alter table public.co2_sessions add column if not exists avg_heart_rate int;
+alter table public.o2_sessions add column if not exists avg_heart_rate int;
+alter table public.breathing_sessions add column if not exists avg_heart_rate int;
