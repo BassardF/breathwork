@@ -8,6 +8,7 @@ import { useWakeLock } from '../../../hooks/useWakeLock';
 import type { BreathingPhase } from '../../../types/domain';
 import { formatClock } from '../../../utils/formatTime';
 import { getBreathsPerMinute, getCycleSeconds, getPatternSummary, PRESET_PATTERNS, validatePattern } from '../../../utils/patterns';
+import { sound } from '../../../utils/sound';
 import { useSaveBreathingSessionMutation, useSaveCustomPatternMutation } from '../queries';
 
 const DURATIONS = [300, 600, 900, 1200];
@@ -67,6 +68,7 @@ export function BreathingPatternsFlow() {
       if (phaseIndex === phases.length - 1) {
         if (cycleIndex >= totalCycles - 1) {
           setStatus('complete');
+          sound.sessionComplete();
           void saveSessionMutation.mutateAsync({
             pattern_name: isCustomPattern ? patternNameInput || 'Custom Pattern' : selectedName,
             phases,
@@ -86,6 +88,7 @@ export function BreathingPatternsFlow() {
 
   useEffect(() => {
     if (status === 'running' && currentPhase) {
+      sound.phaseChange(currentPhase.kind);
       resetTimer(currentPhase.seconds * 1000);
       startTimer();
     }
@@ -357,6 +360,7 @@ export function BreathingPatternsFlow() {
               fullWidth
               disabled={!canStart}
               onClick={() => {
+                sound.sessionStart();
                 setAnimationPhase('hold-empty');
                 setPhaseIndex(0);
                 setCycleIndex(0);
