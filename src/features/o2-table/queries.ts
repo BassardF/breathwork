@@ -13,7 +13,7 @@ export function useSaveO2SessionMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (
-      payload: Pick<O2Session, 'pb_used_seconds' | 'rest_duration_seconds' | 'max_hold_pct' | 'completed_rounds'>,
+      payload: Pick<O2Session, 'pb_used_seconds' | 'rest_duration_seconds' | 'max_hold_pct' | 'completed_rounds' | 'avg_heart_rate'>,
     ) => saveO2Session(await getSession(), payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['o2-sessions'] });

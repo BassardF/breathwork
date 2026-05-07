@@ -13,7 +13,7 @@ export function useSaveCo2SessionMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (
-      payload: Pick<Co2Session, 'pb_used_seconds' | 'hold_pct' | 'completed_rounds'>,
+      payload: Pick<Co2Session, 'pb_used_seconds' | 'hold_pct' | 'completed_rounds' | 'avg_heart_rate'>,
     ) => saveCo2Session(await getSession(), payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['co2-sessions'] });

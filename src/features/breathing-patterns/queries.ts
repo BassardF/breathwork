@@ -20,7 +20,7 @@ export function useSaveBreathingSessionMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (
-      payload: Pick<BreathingSession, 'pattern_name' | 'phases' | 'total_duration_seconds' | 'cycles_completed'>,
+      payload: Pick<BreathingSession, 'pattern_name' | 'phases' | 'total_duration_seconds' | 'cycles_completed' | 'avg_heart_rate'>,
     ) => saveBreathingSession(await getSession(), payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['breathing-sessions'] });
