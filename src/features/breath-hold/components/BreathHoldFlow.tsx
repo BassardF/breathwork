@@ -163,13 +163,13 @@ export function BreathHoldFlow() {
                 <p className="text-xs tracking-[0.2em] text-slate-500 uppercase">#{entry.rank}</p>
                 <p className="mt-1 text-lg font-medium text-white">
                   {formatClock(entry.duration_seconds)}
-                  {entry.avg_heart_rate ? (
-                    <span className="ml-2 text-sm font-normal text-slate-400">· {entry.avg_heart_rate} bpm</span>
-                  ) : null}
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <p className="text-sm text-slate-400">{new Date(entry.recorded_at).toLocaleDateString()}</p>
+                <p className="text-sm text-slate-400">
+                  {new Date(entry.recorded_at).toLocaleDateString()}
+                  {entry.avg_heart_rate ? <span className="ml-1.5 text-xs text-slate-500">· {entry.avg_heart_rate} bpm</span> : null}
+                </p>
                 <button
                   type="button"
                   onClick={() => setDeleteTarget(entry.id)}

@@ -25,9 +25,6 @@ export function StatisticsView() {
   }
 
   const bestHold = data.breathHolds[0];
-  const bestCo2 = [...data.co2Sessions].sort((a, b) => b.completed_rounds - a.completed_rounds)[0];
-  const bestO2 = [...data.o2Sessions].sort((a, b) => b.completed_rounds - a.completed_rounds)[0];
-  const bestPattern = [...data.breathingSessions].sort((a, b) => b.cycles_completed - a.cycles_completed)[0];
 
   const allWithHr = [
     ...data.breathHolds.filter((e) => e.avg_heart_rate).map((e) => ({ hr: e.avg_heart_rate!, date: e.recorded_at, type: 'hold' as const })),
@@ -36,6 +33,20 @@ export function StatisticsView() {
     ...data.breathingSessions.filter((e) => e.avg_heart_rate).map((e) => ({ hr: e.avg_heart_rate!, date: e.completed_at, type: 'pattern' as const })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const latestHr = allWithHr[0];
+
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+  const weeklyBreathingSessions = data.breathingSessions.filter(
+    (s) => new Date(s.completed_at) >= startOfWeek,
+  ).length;
+  const weeklyCo2Sessions = data.co2Sessions.filter(
+    (s) => new Date(s.completed_at) >= startOfWeek,
+  ).length;
+  const weeklyO2Sessions = data.o2Sessions.filter(
+    (s) => new Date(s.completed_at) >= startOfWeek,
+  ).length;
 
   const holdProgress = [...data.breathHolds]
     .reverse()
@@ -105,14 +116,15 @@ export function StatisticsView() {
           </p>
         </Card>
         <Card className="space-y-2">
-          <p className="text-xs tracking-[0.24em] text-slate-500 uppercase">Best Tables</p>
-          <p className="text-sm text-slate-300">CO2: {bestCo2 ? `${bestCo2.completed_rounds}/8 rounds` : 'No data yet'}</p>
-          <p className="text-sm text-slate-300">O2: {bestO2 ? `${bestO2.completed_rounds}/8 rounds` : 'No data yet'}</p>
+          <p className="text-xs tracking-[0.24em] text-slate-500 uppercase">Tables</p>
+          <p className="text-sm text-slate-300"><strong>CO2</strong> - {weeklyCo2Sessions} session{weeklyCo2Sessions > 1 ? 's' : ''}</p>
+          <p className="text-sm text-slate-300"><strong>O2</strong> - {weeklyO2Sessions} session{weeklyO2Sessions > 1 ? 's' : ''}</p>
+          <p className="text-xs text-slate-500">weekly</p>
         </Card>
         <Card className="space-y-2">
-          <p className="text-xs tracking-[0.24em] text-slate-500 uppercase">Breathing Cycles</p>
-          <p className="text-4xl font-semibold text-white">{bestPattern?.cycles_completed ?? 0}</p>
-          <p className="text-sm text-slate-400">{bestPattern?.pattern_name ?? 'No data yet'}</p>
+          <p className="text-xs tracking-[0.24em] text-slate-500 uppercase">Breathing</p>
+          <p className="text-4xl font-semibold text-white">{weeklyBreathingSessions}</p>
+          <p className="text-sm text-slate-400">weekly session{weeklyBreathingSessions > 1 ? 's' : ''}</p>
         </Card>
         <Card className="space-y-2">
           <p className="text-xs tracking-[0.24em] text-slate-500 uppercase">Heart Rate</p>
@@ -130,7 +142,7 @@ export function StatisticsView() {
                 <LineChart data={holdProgress}>
                   <XAxis dataKey="date" stroke="#64748b" />
                   <YAxis stroke="#64748b" />
-                  <Tooltip />
+                  <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#e2e8f0', fontSize: '13px' }} />
                   <Line type="monotone" dataKey="seconds" stroke="#bae6fd" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
@@ -147,7 +159,7 @@ export function StatisticsView() {
                 <LineChart data={completionTrend}>
                   <XAxis dataKey="session" stroke="#64748b" />
                   <YAxis stroke="#64748b" domain={[0, 8]} />
-                  <Tooltip />
+                  <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#e2e8f0', fontSize: '13px' }} />
                   <Line type="monotone" dataKey="rounds" stroke="#7dd3fc" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
