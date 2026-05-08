@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { HashRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { registerSW } from 'virtual:pwa-register';
 import { App } from './App';
 import { useSupabaseSession } from './hooks/useSupabaseSession';
@@ -12,13 +12,15 @@ registerSW({ immediate: true });
 
 export function Root() {
   useSupabaseSession();
-  const showQueryDevtools = import.meta.env.DEV && import.meta.env.VITE_ENABLE_QUERY_DEVTOOLS === 'true';
+  const showQueryDevtools =
+    import.meta.env.DEV &&
+    import.meta.env.VITE_ENABLE_QUERY_DEVTOOLS === 'true';
 
   return (
     <QueryClientProvider client={queryClient}>
-      <HashRouter>
+      <BrowserRouter>
         <App />
-      </HashRouter>
+      </BrowserRouter>
       {showQueryDevtools ? <ReactQueryDevtools initialIsOpen={false} /> : null}
     </QueryClientProvider>
   );

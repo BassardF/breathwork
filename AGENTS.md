@@ -2,20 +2,20 @@
 
 ## Commands (run in order when applicable)
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | Start Vite dev server |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | `eslint .` |
-| `npm run test` | `vitest run` |
-| `npm run build` | `tsc -b && vite build` |
+| Command             | What it does           |
+| ------------------- | ---------------------- |
+| `npm run dev`       | Start Vite dev server  |
+| `npm run typecheck` | `tsc --noEmit`         |
+| `npm run lint`      | `eslint .`             |
+| `npm run test`      | `vitest run`           |
+| `npm run build`     | `tsc -b && vite build` |
 
 CI order (GitHub Actions): `typecheck` → `lint` → `test` → `build`  
 Pre-commit (husky): `lint-staged` runs `eslint --fix` + `prettier --write` on staged `*.{ts,tsx,js,jsx}`, `prettier --write` on `*.{json,css,md,yml,yaml}`
 
 ## Project structure
 
-- `src/main.tsx` — root entry (TanStack Query + HashRouter + PWA SW registration)
+- `src/main.tsx` — root entry (TanStack Query + BrowserRouter + PWA SW registration)
 - `src/App.tsx` — routes and page composition
 - `src/lib/repository.ts` — all DB operations (Supabase + localStorage fallback)
 - `src/stores/` — Zustand stores with `immer` + `devtools` middleware
@@ -29,8 +29,10 @@ Pre-commit (husky): `lint-staged` runs `eslint --fix` + `prettier --write` on st
 - **Never mix layers**: Zustand stores never fetch data; TanStack Query hooks never touch Zustand
 - Components own zero business logic — hooks/utils own it
 - Repository falls back to localStorage when Supabase is not configured (no `.env.local`)
-- `HashRouter` (not BrowserRouter) — required for GitHub Pages
-- `base: './'` in vite.config — required for GitHub Pages relative paths
+- `BrowserRouter` (not HashRouter) — landing page at `/` requires clean routes
+- `base: '/'` in vite.config — required for BrowserRouter
+- Route structure: `/` (landing), `/login` (auth), protected routes under `<ProtectedRoute>`: `/hold`, `/co2`, `/o2`, `/patterns`, `/learn`, `/stats`, `/settings`
+- `ProtectedRoute` redirects to `/login` when not authenticated; `AuthPage` redirects to `/hold` when already authenticated
 - React Query DevTools: enable with `VITE_ENABLE_QUERY_DEVTOOLS=true`
 
 ## Testing

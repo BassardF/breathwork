@@ -1,12 +1,13 @@
-import type { FormEvent, PropsWithChildren } from 'react';
+import type { FormEvent } from 'react';
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { signInWithMagicLink } from '../../../lib/repository';
 import { isSupabaseConfigured } from '../../../lib/supabase';
 import { useAuthStore } from '../../../stores/authStore';
 
-export function AuthGate({ children }: PropsWithChildren) {
+export function AuthPage() {
   const user = useAuthStore((state) => state.user);
   const isLoading = useAuthStore((state) => state.isLoading);
   const isLocalMode = useAuthStore((state) => state.isLocalMode);
@@ -26,8 +27,8 @@ export function AuthGate({ children }: PropsWithChildren) {
     );
   }
 
-  if (isLocalMode) {
-    return <>{children}</>;
+  if (isLocalMode || user) {
+    return <Navigate to="/hold" replace />;
   }
 
   if (!isSupabaseConfigured) {
@@ -189,5 +190,5 @@ export function AuthGate({ children }: PropsWithChildren) {
     );
   }
 
-  return <>{children}</>;
+  return <Navigate to="/hold" replace />;
 }

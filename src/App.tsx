@@ -1,7 +1,9 @@
 import { Link, Route, Routes } from 'react-router-dom';
 import { PageHeader } from './components/layout/PageHeader';
 import { AppShell } from './components/layout/AppShell';
-import { AuthGate } from './features/auth/components/AuthGate';
+import { AuthPage } from './features/auth/components/AuthPage';
+import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
+import { LandingPage } from './features/landing/components/LandingPage';
 import { BreathHoldFlow } from './features/breath-hold/components/BreathHoldFlow';
 import { Co2TableFlow } from './features/co2-table/components/Co2TableFlow';
 import { O2TableFlow } from './features/o2-table/components/O2TableFlow';
@@ -19,7 +21,10 @@ function BreathHoldPage() {
         description="A ten-second ready phase followed by a clean, full-screen timer and immediate leaderboard feedback."
       />
       <p className="-mt-4">
-        <Link to="/learn?section=breath-hold" className="text-xs text-sky-400/60 hover:text-sky-300 transition-colors">
+        <Link
+          to="/learn?section=breath-hold"
+          className="text-xs text-sky-400/60 hover:text-sky-300 transition-colors"
+        >
           Learn why this works →
         </Link>
       </p>
@@ -32,12 +37,15 @@ function Co2Page() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="CO₂ Tolerance"
+        eyebrow="CO2 Tolerance"
         title="CO2 Table"
         description="Fixed hold duration, descending rest windows, and a preview before you begin."
       />
       <p className="-mt-4">
-        <Link to="/learn?section=co2" className="text-xs text-sky-400/60 hover:text-sky-300 transition-colors">
+        <Link
+          to="/learn?section=co2"
+          className="text-xs text-sky-400/60 hover:text-sky-300 transition-colors"
+        >
           Learn why this works →
         </Link>
       </p>
@@ -50,12 +58,15 @@ function O2Page() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="O₂ Tolerance"
+        eyebrow="O2 Tolerance"
         title="O2 Table"
         description="Steady recovery time with progressively longer holds based on your current personal best."
       />
       <p className="-mt-4">
-        <Link to="/learn?section=o2" className="text-xs text-sky-400/60 hover:text-sky-300 transition-colors">
+        <Link
+          to="/learn?section=o2"
+          className="text-xs text-sky-400/60 hover:text-sky-300 transition-colors"
+        >
           Learn why this works →
         </Link>
       </p>
@@ -73,7 +84,10 @@ function PatternsPage() {
         description="Preset rhythm work, saved custom patterns, and smooth inhale-exhale pacing."
       />
       <p className="-mt-4">
-        <Link to="/learn?section=pattern" className="text-xs text-sky-400/60 hover:text-sky-300 transition-colors">
+        <Link
+          to="/learn?section=pattern"
+          className="text-xs text-sky-400/60 hover:text-sky-300 transition-colors"
+        >
           Learn why this works →
         </Link>
       </p>
@@ -123,10 +137,12 @@ function LearnPage() {
 
 export function App() {
   return (
-    <AuthGate>
-      <Routes>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<AuthPage />} />
+      <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
-          <Route path="/" element={<BreathHoldPage />} />
+          <Route path="/hold" element={<BreathHoldPage />} />
           <Route path="/co2" element={<Co2Page />} />
           <Route path="/o2" element={<O2Page />} />
           <Route path="/patterns" element={<PatternsPage />} />
@@ -134,7 +150,7 @@ export function App() {
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/learn" element={<LearnPage />} />
         </Route>
-      </Routes>
-    </AuthGate>
+      </Route>
+    </Routes>
   );
 }

@@ -4,18 +4,23 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: './',
+  base: '/',
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon-192.svg', 'icon-512.svg', 'icon-192.png', 'icon-512.png'],
+      includeAssets: [
+        'icon-192.svg',
+        'icon-512.svg',
+        'icon-192.png',
+        'icon-512.png',
+      ],
       manifest: {
         name: 'Apnea Trainer',
         short_name: 'Apnea',
         description: 'Breath hold training and guided breathing practice.',
-        start_url: '.',
+        start_url: '/',
         display: 'standalone',
         display_override: ['window-controls-overlay', 'standalone'],
         background_color: '#09111c',
