@@ -54,10 +54,12 @@ export async function signInWithMagicLink(email: string) {
 }
 
 export async function signOut() {
-  if (!supabase) {
-    return;
+  if (supabase) {
+    await supabase.auth.signOut();
   }
-  await supabase.auth.signOut();
+  useAuthStore.getState().setLocalMode(false);
+  useAuthStore.getState().setLocalSafetyAcknowledged(false);
+  queryClient.invalidateQueries();
 }
 
 export async function updateSafetyAcknowledgement() {
@@ -102,10 +104,7 @@ export async function fetchBreathHolds(
   return data;
 }
 
-export async function deleteBreathHold(
-  session: Session | null,
-  id: string,
-) {
+export async function deleteBreathHold(session: Session | null, id: string) {
   if (!supabase || !session) {
     const entries = readLocal<BreathHoldEntry>(BREATH_HOLDS_KEY);
     writeLocal(
@@ -206,7 +205,9 @@ export async function saveCo2Session(
     .insert({
       user_id: session.user.id,
       ...payload,
-      ...(payload.avg_heart_rate !== undefined ? { avg_heart_rate: payload.avg_heart_rate } : {}),
+      ...(payload.avg_heart_rate !== undefined
+        ? { avg_heart_rate: payload.avg_heart_rate }
+        : {}),
     })
     .select()
     .single();
@@ -263,7 +264,9 @@ export async function saveO2Session(
     .insert({
       user_id: session.user.id,
       ...payload,
-      ...(payload.avg_heart_rate !== undefined ? { avg_heart_rate: payload.avg_heart_rate } : {}),
+      ...(payload.avg_heart_rate !== undefined
+        ? { avg_heart_rate: payload.avg_heart_rate }
+        : {}),
     })
     .select()
     .single();
@@ -324,7 +327,9 @@ export async function saveBreathingSession(
     .insert({
       user_id: session.user.id,
       ...payload,
-      ...(payload.avg_heart_rate !== undefined ? { avg_heart_rate: payload.avg_heart_rate } : {}),
+      ...(payload.avg_heart_rate !== undefined
+        ? { avg_heart_rate: payload.avg_heart_rate }
+        : {}),
     })
     .select()
     .single();

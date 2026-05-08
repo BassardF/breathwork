@@ -15,7 +15,6 @@ export function MobileNav({ installPrompt, onInstall }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const isLocalMode = useAuthStore((state) => state.isLocalMode);
-  const setLocalMode = useAuthStore((state) => state.setLocalMode);
 
   return (
     <>
@@ -85,13 +84,9 @@ export function MobileNav({ installPrompt, onInstall }: MobileNavProps) {
               Sign out
             </Button>
           ) : isLocalMode ? (
-            <Button
-              variant="ghost"
-              fullWidth
-              onClick={() => setLocalMode(false)}
-            >
+            <Button variant="ghost" fullWidth onClick={() => void signOut()}>
               <LogOut className="mr-2 inline h-4 w-4" />
-              Sign in
+              Sign out
             </Button>
           ) : null}
         </div>

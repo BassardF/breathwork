@@ -5,17 +5,15 @@ import { Card } from '../../../components/ui/Card';
 import { signInWithMagicLink } from '../../../lib/repository';
 import { isSupabaseConfigured } from '../../../lib/supabase';
 import { useAuthStore } from '../../../stores/authStore';
-import { SafetyDisclaimer } from './SafetyDisclaimer';
 
 export function AuthGate({ children }: PropsWithChildren) {
   const user = useAuthStore((state) => state.user);
   const isLoading = useAuthStore((state) => state.isLoading);
-  const safetyAcknowledged = useAuthStore((state) => state.safetyAcknowledged);
   const isLocalMode = useAuthStore((state) => state.isLocalMode);
-  const localSafetyAcknowledged = useAuthStore(
-    (state) => state.localSafetyAcknowledged,
-  );
   const setLocalMode = useAuthStore((state) => state.setLocalMode);
+  const setLocalSafetyAcknowledged = useAuthStore(
+    (state) => state.setLocalSafetyAcknowledged,
+  );
   const [email, setEmail] = useState('');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,9 +27,6 @@ export function AuthGate({ children }: PropsWithChildren) {
   }
 
   if (isLocalMode) {
-    if (!localSafetyAcknowledged) {
-      return <SafetyDisclaimer />;
-    }
     return <>{children}</>;
   }
 
@@ -39,6 +34,7 @@ export function AuthGate({ children }: PropsWithChildren) {
     return (
       <div className="grid min-h-screen place-items-center px-4">
         <Card className="max-w-xl space-y-6">
+          {/* Section 1: info */}
           <div className="space-y-3">
             <p className="text-xs tracking-[0.32em] text-slate-500 uppercase">
               Personal Practice
@@ -50,8 +46,6 @@ export function AuthGate({ children }: PropsWithChildren) {
               Installable breathwork and static apnea training. Add Supabase
               credentials to enable cloud sync, or continue with local storage.
             </p>
-          </div>
-          <div className="space-y-3">
             <p className="text-sm text-slate-400">
               Cloud sync requires{' '}
               <code className="rounded bg-slate-800 px-1.5 py-0.5 text-xs">
@@ -67,9 +61,31 @@ export function AuthGate({ children }: PropsWithChildren) {
               </code>
               .
             </p>
-            <Button fullWidth onClick={() => setLocalMode(true)}>
-              Continue with Local Storage
+          </div>
+
+          {/* Section 2: local auth */}
+          <div className="space-y-3">
+            <Button
+              fullWidth
+              onClick={() => {
+                setLocalSafetyAcknowledged(true);
+                setLocalMode(true);
+              }}
+            >
+              Login in local mode
             </Button>
+            <p className="text-center text-xs text-slate-500">
+              Data will be stored locally and won't sync across devices.
+            </p>
+          </div>
+
+          {/* Section 3: disclaimer */}
+          <div className="border-t border-white/10 pt-4">
+            <p className="text-sm leading-6 text-slate-400">
+              Breath hold training carries risk of hypoxic blackout. Never
+              practice alone or in/near water without a trained buddy. This app
+              is for dry land training only.
+            </p>
           </div>
         </Card>
       </div>
@@ -99,6 +115,7 @@ export function AuthGate({ children }: PropsWithChildren) {
     return (
       <div className="grid min-h-screen place-items-center px-4">
         <Card className="max-w-xl space-y-6">
+          {/* Section 1: email */}
           <div className="space-y-3">
             <p className="text-xs tracking-[0.32em] text-slate-500 uppercase">
               Personal Practice
@@ -134,27 +151,42 @@ export function AuthGate({ children }: PropsWithChildren) {
               <p className="text-sm text-slate-400">{statusMessage}</p>
             ) : null}
           </form>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
+
+          {/* Section 2: local auth */}
+          <div className="space-y-3">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-xs text-slate-500">
+                <span className="bg-slate-950 px-2">or</span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-xs text-slate-500">
-              <span className="bg-slate-950 px-2">or</span>
-            </div>
+            <Button
+              fullWidth
+              onClick={() => {
+                setLocalSafetyAcknowledged(true);
+                setLocalMode(true);
+              }}
+            >
+              Login in local mode
+            </Button>
+            <p className="text-center text-xs text-slate-500">
+              Data will be stored locally and won't sync across devices.
+            </p>
           </div>
-          <Button variant="ghost" fullWidth onClick={() => setLocalMode(true)}>
-            Continue without account →
-          </Button>
-          <p className="text-center text-xs text-slate-500">
-            Data will be stored locally and won't sync across devices.
-          </p>
+
+          {/* Section 3: disclaimer */}
+          <div className="border-t border-white/10 pt-4">
+            <p className="text-sm leading-6 text-slate-400">
+              Breath hold training carries risk of hypoxic blackout. Never
+              practice alone or in/near water without a trained buddy. This app
+              is for dry land training only.
+            </p>
+          </div>
         </Card>
       </div>
     );
-  }
-
-  if (!safetyAcknowledged) {
-    return <SafetyDisclaimer />;
   }
 
   return <>{children}</>;

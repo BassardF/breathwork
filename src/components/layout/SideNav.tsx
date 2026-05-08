@@ -14,7 +14,6 @@ interface SideNavProps {
 export function SideNav({ isOffline, installPrompt, onInstall }: SideNavProps) {
   const user = useAuthStore((state) => state.user);
   const isLocalMode = useAuthStore((state) => state.isLocalMode);
-  const setLocalMode = useAuthStore((state) => state.setLocalMode);
 
   return (
     <aside className="fixed left-0 top-0 z-30 hidden h-screen w-56 flex-col border-r border-white/10 bg-[#08111c] p-6 lg:flex">
@@ -26,7 +25,7 @@ export function SideNav({ isOffline, installPrompt, onInstall }: SideNavProps) {
           {user
             ? `Signed in as ${user.email}`
             : isLocalMode
-              ? 'Using local storage'
+              ? 'Using local mode'
               : 'Focused dry-land breathwork.'}
         </p>
       </div>
@@ -69,9 +68,9 @@ export function SideNav({ isOffline, installPrompt, onInstall }: SideNavProps) {
             Sign out
           </Button>
         ) : isLocalMode ? (
-          <Button variant="ghost" fullWidth onClick={() => setLocalMode(false)}>
+          <Button variant="ghost" fullWidth onClick={() => void signOut()}>
             <LogOut className="mr-2 inline h-4 w-4" />
-            Sign in
+            Sign out
           </Button>
         ) : null}
       </div>
