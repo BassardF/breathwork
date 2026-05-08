@@ -12,7 +12,7 @@ test('renders statistics page with history', async ({ page }) => {
 });
 
 test('shows session history content', async ({ page }) => {
-  await page.goto(navUrl('/'));
+  await page.goto(navUrl('/hold'));
   await page.getByRole('button', { name: 'Start test' }).click();
   await page.waitForTimeout(12000);
   await page.getByRole('button', { name: 'Stop' }).click();
@@ -28,9 +28,13 @@ test('shows session history content', async ({ page }) => {
 
 test('shows type filter buttons', async ({ page }) => {
   await page.goto(navUrl('/stats'));
-  await expect(page.getByRole('button', { name: 'All', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'All', exact: true }),
+  ).toBeVisible();
   await expect(page.getByText('Breath Hold', { exact: true })).toBeVisible();
   await expect(page.getByText('CO2 Table', { exact: true })).toBeVisible();
   await expect(page.getByText('O2 Table', { exact: true })).toBeVisible();
-  await expect(page.getByText('Breathing', { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Breathing', exact: true }),
+  ).toBeVisible();
 });

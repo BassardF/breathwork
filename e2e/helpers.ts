@@ -8,5 +8,5 @@ export async function seedLocalStorage(page: Page) {
 }
 
 export function navUrl(path: string): string {
-  return `/#${path}`;
+  return path;
 }

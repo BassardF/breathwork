@@ -3,11 +3,13 @@ import { seedLocalStorage, navUrl } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await seedLocalStorage(page);
-  await page.goto(navUrl('/'));
+  await page.goto(navUrl('/hold'));
 });
 
 test('shows leaderboard and starts a hold session', async ({ page }) => {
-  await expect(page.getByRole('heading', { name: 'Leaderboard' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Leaderboard' }),
+  ).toBeVisible();
   await expect(page.getByText('No recorded holds yet.')).toBeVisible();
 
   await page.getByRole('button', { name: 'Start test' }).click();

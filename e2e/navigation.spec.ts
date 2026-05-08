@@ -6,9 +6,11 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('navigates all routes via sidebar', async ({ page }) => {
-  await page.goto(navUrl('/'));
+  await page.goto(navUrl('/hold'));
 
-  await expect(page.getByRole('heading', { name: 'Max Breath Hold' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Max Breath Hold' }),
+  ).toBeVisible();
 
   const sidebar = page.locator('aside');
   const links = [
