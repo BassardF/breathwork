@@ -35,21 +35,21 @@ Without Supabase, the app runs fully in **local-only mode** using localStorage.
 
 ## Scripts
 
-| Command | Action |
-|---|---|
-| `npm run dev` | Start dev server |
-| `npm run build` | Type check + production build |
-| `npm run preview` | Preview production build |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | ESLint |
-| `npm run test` | Vitest unit tests |
-| `npm run test:e2e` | Playwright E2E tests |
+| Command             | Action                        |
+| ------------------- | ----------------------------- |
+| `npm run dev`       | Start dev server              |
+| `npm run build`     | Type check + production build |
+| `npm run preview`   | Preview production build      |
+| `npm run typecheck` | `tsc --noEmit`                |
+| `npm run lint`      | ESLint                        |
+| `npm run test`      | Vitest unit tests             |
+| `npm run test:e2e`  | Playwright E2E tests          |
 
 ## Stack
 
 - **Framework** — React 18, TypeScript (strict), Vite 5
 - **Styling** — Tailwind CSS v4 (`@tailwindcss/vite` plugin)
-- **Routing** — React Router v6 (HashRouter for GitHub Pages)
+- **Routing** — React Router v6 (BrowserRouter)
 - **State** — TanStack Query v5 (server), Zustand v5 + immer + devtools (client)
 - **Backend** — Supabase (auth via email magic links, PostgreSQL)
 - **Charts** — Recharts
@@ -72,6 +72,7 @@ src/
 ```
 
 **Key conventions:**
+
 - Components own zero business logic — hooks and utils own it
 - Zustand stores never fetch data; TanStack Query hooks never touch Zustand
 - Repository auto-falls back to localStorage when Supabase is unconfigured
