@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { BluetoothOff, Heart } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
+import { InfoBlock } from '../../../components/ui/InfoBlock';
 import { useBluetoothHR } from '../../../hooks/useBluetoothHR';
 
 export function SettingsFlow() {
-  const { bpm, isConnected, deviceName, connect, disconnect, isSupported } = useBluetoothHR();
+  const { bpm, isConnected, deviceName, connect, disconnect, isSupported } =
+    useBluetoothHR();
   const [error, setError] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
 
@@ -36,15 +38,20 @@ export function SettingsFlow() {
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(320px,420px)]">
       <Card className="space-y-6">
         <div>
-          <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">Bluetooth</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">Heart Rate Monitor</h2>
+          <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">
+            Bluetooth
+          </p>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
+            Heart Rate Monitor
+          </h2>
         </div>
 
         {!isSupported ? (
           <div className="rounded-3xl border border-white/8 bg-slate-950/45 px-5 py-8 text-center">
             <BluetoothOff className="mx-auto h-8 w-8 text-slate-600" />
             <p className="mt-3 text-sm text-slate-400">
-              Web Bluetooth is not supported in this browser. Try Chrome, Edge, or Samsung Internet.
+              Web Bluetooth is not supported in this browser. Try Chrome, Edge,
+              or Samsung Internet.
             </p>
           </div>
         ) : (
@@ -76,7 +83,10 @@ export function SettingsFlow() {
 
             {isConnected && bpm !== null ? (
               <div className="rounded-3xl bg-sky-950/30 border border-sky-300/15 px-5 py-8 text-center">
-                <Heart className="mx-auto h-8 w-8 text-rose-400" fill="currentColor" />
+                <Heart
+                  className="mx-auto h-8 w-8 text-rose-400"
+                  fill="currentColor"
+                />
                 <p className="mt-3 text-6xl font-semibold tracking-tight text-white tabular-nums">
                   {bpm}
                 </p>
@@ -84,27 +94,44 @@ export function SettingsFlow() {
               </div>
             ) : isConnected ? (
               <div className="rounded-3xl border border-white/8 bg-slate-950/45 px-5 py-8 text-center">
-                <p className="text-sm text-slate-400">Waiting for first reading…</p>
+                <p className="text-sm text-slate-400">
+                  Waiting for first reading…
+                </p>
               </div>
             ) : null}
 
-            {error ? (
-              <p className="text-sm text-rose-300">{error}</p>
-            ) : null}
+            {error ? <p className="text-sm text-rose-300">{error}</p> : null}
           </div>
         )}
+
+        <InfoBlock
+          description="Web Bluetooth lets the browser talk directly to BLE devices, but it comes with a few important restrictions."
+          tips={[
+            'Only works in Chrome, Edge, and Samsung Internet — Safari and Firefox are not supported.',
+            'Requires HTTPS (or localhost during development). Plain HTTP will not work.',
+            'You must tap the "Connect" button to trigger the device chooser — it cannot be automated.',
+            'The connection may drop if the device goes out of range. Reconnection requires a fresh pairing.',
+            'iOS support is limited and often unreliable. A native app may be needed for consistent results.',
+            'Only one HR monitor can be connected at a time.',
+          ]}
+        />
       </Card>
 
       <Card className="space-y-4">
         <h3 className="text-xl font-semibold text-white">Info</h3>
         <div className="space-y-3 text-sm text-slate-400">
           <p>
-            Pair a Bluetooth Low Energy (BLE) heart rate monitor to see live BPM during training and
-            record average heart rate with each session.
+            Pair a Bluetooth Low Energy (BLE) heart rate monitor to see live BPM
+            during training and record average heart rate with each session.
           </p>
           <ul className="list-disc space-y-1 pl-4">
-            <li>Compatible with any standard BLE HR monitor (chest strap, arm band, watch)</li>
-            <li>Heart rate is recorded alongside each session when connected</li>
+            <li>
+              Compatible with any standard BLE HR monitor (chest strap, arm
+              band, watch)
+            </li>
+            <li>
+              Heart rate is recorded alongside each session when connected
+            </li>
             <li>View average HR in your statistics history</li>
             <li>Bluetooth must be enabled on your device</li>
           </ul>
