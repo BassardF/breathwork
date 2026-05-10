@@ -7,12 +7,14 @@ test.beforeEach(async ({ page }) => {
 
 test('renders landing page with get started link', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Get Started')).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Get Started' }).first(),
+  ).toBeVisible();
 });
 
 test('get started navigates through auth to the app', async ({ page }) => {
   await page.goto('/');
-  await page.getByText('Get Started').click();
+  await page.getByRole('button', { name: 'Get Started' }).first().click();
   await expect(
     page.getByRole('heading', { name: 'Max Breath Hold' }),
   ).toBeVisible();
