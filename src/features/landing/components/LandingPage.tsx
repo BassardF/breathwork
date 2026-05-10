@@ -198,15 +198,26 @@ export function LandingPage() {
         </div>
 
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
-          <svg width="72" height="72" viewBox="0 0 192 192" className="mb-8">
-            <rect width="192" height="192" rx="40" fill="#070e17" />
-            <circle cx="96" cy="96" r="54" fill="#173450" />
-            <circle cx="96" cy="96" r="36" fill="#D2E8F5" />
-            <path
-              d="M96 56C104.837 56 112 63.1634 112 72V120C112 128.837 104.837 136 96 136C87.1634 136 80 128.837 80 120V72C80 63.1634 87.1634 56 96 56Z"
-              fill="#070e17"
+          <div className="relative mb-8">
+            <div
+              className="absolute inset-0 rounded-[28px] bg-sky-400/10 blur-2xl"
+              aria-hidden="true"
             />
-          </svg>
+            <svg
+              width="72"
+              height="72"
+              viewBox="0 0 192 192"
+              className="relative"
+            >
+              <rect width="192" height="192" rx="40" fill="#070e17" />
+              <circle cx="96" cy="96" r="54" fill="#173450" />
+              <circle cx="96" cy="96" r="36" fill="#D2E8F5" />
+              <path
+                d="M96 56C104.837 56 112 63.1634 112 72V120C112 128.837 104.837 136 96 136C87.1634 136 80 128.837 80 120V72C80 63.1634 87.1634 56 96 56Z"
+                fill="#070e17"
+              />
+            </svg>
+          </div>
 
           <p className="mb-4 text-xs tracking-[0.35em] text-sky-300/60 uppercase">
             Breathwork &bull; Static Apnea

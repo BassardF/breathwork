@@ -3,8 +3,10 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const base = process.env.BASE_URL || '/';
+
 export default defineConfig({
-  base: '/',
+  base,
   plugins: [
     react(),
     tailwindcss(),
@@ -20,7 +22,7 @@ export default defineConfig({
         name: 'Apnea Trainer',
         short_name: 'Apnea',
         description: 'Breath hold training and guided breathing practice.',
-        start_url: '/',
+        start_url: base,
         display: 'standalone',
         display_override: ['window-controls-overlay', 'standalone'],
         background_color: '#09111c',
