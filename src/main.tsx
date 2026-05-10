@@ -18,7 +18,7 @@ export function Root() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <App />
       </BrowserRouter>
       {showQueryDevtools ? <ReactQueryDevtools initialIsOpen={false} /> : null}
