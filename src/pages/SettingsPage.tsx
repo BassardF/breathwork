@@ -7,7 +7,7 @@ export function SettingsPage() {
       <PageHeader
         eyebrow="Configuration"
         title="Settings"
-        description="Bluetooth HR monitor pairing, device management, and live heart rate display."
+        description="Bluetooth HR monitor pairing, device management, live heart rate display, and training preferences."
       />
       <SettingsFlow />
     </div>

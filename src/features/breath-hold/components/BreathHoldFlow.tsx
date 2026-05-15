@@ -13,13 +13,12 @@ import { useSessionStore } from '../../../stores/sessionStore';
 import { formatClock, formatDurationPrecise } from '../../../utils/formatTime';
 import { BpmIndicator } from '../../../components/ui/BpmIndicator';
 import { useHeartRateRecorder } from '../../../hooks/useHeartRateRecorder';
+import { useSettingsStore } from '../../../stores/settingsStore';
 import {
   useBreathHoldsQuery,
   useDeleteBreathHoldMutation,
   useSaveBreathHoldMutation,
 } from '../queries';
-
-const READY_SECONDS = 10;
 
 export function BreathHoldFlow() {
   const { data: holds = [] } = useBreathHoldsQuery();
@@ -38,6 +37,7 @@ export function BreathHoldFlow() {
   const startSession = useSessionStore((state) => state.startSession);
   const updateSession = useSessionStore((state) => state.updateSession);
   const clearSession = useSessionStore((state) => state.clearSession);
+  const { holdPrepTimeEnabled, holdPrepTimeSeconds } = useSettingsStore();
   const holdTimer = useTimer();
   const {
     elapsedMs: holdElapsedMs,
@@ -48,7 +48,7 @@ export function BreathHoldFlow() {
 
   const countdown = useTimer({
     direction: 'down',
-    initialMs: READY_SECONDS * 1000,
+    initialMs: holdPrepTimeSeconds * 1000,
     onComplete: () => {
       setStage('holding');
     },
@@ -91,16 +91,21 @@ export function BreathHoldFlow() {
     setLastResult(null);
     setStage('idle');
     resetHold(0);
-    resetCountdown(READY_SECONDS * 1000);
+    resetCountdown(holdPrepTimeSeconds * 1000);
   };
 
   const start = () => {
     setLastResult(null);
-    setStage('countdown');
-    startSession('breath-hold', 'countdown');
     resetHold(0);
-    resetCountdown(READY_SECONDS * 1000);
-    startCountdown();
+    resetCountdown(holdPrepTimeSeconds * 1000);
+    if (holdPrepTimeEnabled) {
+      setStage('countdown');
+      startSession('breath-hold', 'countdown');
+      startCountdown();
+    } else {
+      setStage('holding');
+      startSession('breath-hold', 'hold');
+    }
   };
 
   const stop = async () => {

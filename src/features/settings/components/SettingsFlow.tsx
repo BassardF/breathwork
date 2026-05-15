@@ -4,6 +4,7 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { InfoBlock } from '../../../components/ui/InfoBlock';
 import { useBluetoothHR } from '../../../hooks/useBluetoothHR';
+import { useSettingsStore } from '../../../stores/settingsStore';
 
 export function SettingsFlow() {
   const { bpm, isConnected, deviceName, connect, disconnect, isSupported } =
@@ -28,6 +29,13 @@ export function SettingsFlow() {
       setConnecting(false);
     }
   };
+
+  const {
+    holdPrepTimeEnabled,
+    holdPrepTimeSeconds,
+    setHoldPrepTimeEnabled,
+    setHoldPrepTimeSeconds,
+  } = useSettingsStore();
 
   const handleDisconnect = () => {
     disconnect();
@@ -136,6 +144,64 @@ export function SettingsFlow() {
             <li>Bluetooth must be enabled on your device</li>
           </ul>
         </div>
+      </Card>
+
+      <Card className="space-y-6">
+        <div>
+          <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">
+            Breath Hold
+          </p>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
+            Preparation
+          </h2>
+        </div>
+
+        <div className="rounded-3xl border border-white/8 bg-slate-950/45 px-5 py-4">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={holdPrepTimeEnabled}
+              onChange={(e) => setHoldPrepTimeEnabled(e.target.checked)}
+              className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-slate-800 text-sky-400 accent-sky-400 focus:ring-2 focus:ring-sky-400/50"
+            />
+            <div>
+              <p className="text-sm font-medium text-white">
+                Preparation countdown
+              </p>
+              <p className="mt-0.5 text-xs text-slate-500">
+                When disabled, the hold starts immediately.
+              </p>
+            </div>
+          </label>
+        </div>
+
+        {holdPrepTimeEnabled ? (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-400">Countdown</span>
+              <span className="text-lg font-medium text-white tabular-nums">
+                {holdPrepTimeSeconds}s
+              </span>
+            </div>
+            <input
+              type="range"
+              min={3}
+              max={30}
+              step={1}
+              value={holdPrepTimeSeconds}
+              onChange={(e) => setHoldPrepTimeSeconds(Number(e.target.value))}
+              className="w-full h-2 rounded-full appearance-none cursor-pointer bg-slate-800 accent-sky-400 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sky-400 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-sky-400/30 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-sky-400 [&::-moz-range-thumb]:border-0"
+            />
+            <div className="flex justify-between text-xs text-slate-600">
+              <span>3s</span>
+              <span>30s</span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500">
+            No countdown — starts immediately.
+          </p>
+        )}
       </Card>
     </div>
   );
