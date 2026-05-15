@@ -13,7 +13,11 @@ import { useSessionStore } from '../../../stores/sessionStore';
 import { formatClock, formatDurationPrecise } from '../../../utils/formatTime';
 import { BpmIndicator } from '../../../components/ui/BpmIndicator';
 import { useHeartRateRecorder } from '../../../hooks/useHeartRateRecorder';
-import { useBreathHoldsQuery, useDeleteBreathHoldMutation, useSaveBreathHoldMutation } from '../queries';
+import {
+  useBreathHoldsQuery,
+  useDeleteBreathHoldMutation,
+  useSaveBreathHoldMutation,
+} from '../queries';
 
 const READY_SECONDS = 10;
 
@@ -21,12 +25,16 @@ export function BreathHoldFlow() {
   const { data: holds = [] } = useBreathHoldsQuery();
   const saveMutation = useSaveBreathHoldMutation();
   const deleteMutation = useDeleteBreathHoldMutation();
-  const [stage, setStage] = useState<'idle' | 'countdown' | 'holding' | 'finished'>('idle');
+  const [stage, setStage] = useState<
+    'idle' | 'countdown' | 'holding' | 'finished'
+  >('idle');
   const [lastResult, setLastResult] = useState<number | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const bestResult = holds[0]?.duration_seconds ?? 0;
   const isNewRecord = lastResult !== null && lastResult >= bestResult;
-  const recorder = useHeartRateRecorder(stage === 'countdown' || stage === 'holding');
+  const recorder = useHeartRateRecorder(
+    stage === 'countdown' || stage === 'holding',
+  );
   const startSession = useSessionStore((state) => state.startSession);
   const updateSession = useSessionStore((state) => state.updateSession);
   const clearSession = useSessionStore((state) => state.clearSession);
@@ -45,7 +53,12 @@ export function BreathHoldFlow() {
       setStage('holding');
     },
   });
-  const { pause: pauseCountdown, reset: resetCountdown, seconds: countdownSeconds, start: startCountdown } = countdown;
+  const {
+    pause: pauseCountdown,
+    reset: resetCountdown,
+    seconds: countdownSeconds,
+    start: startCountdown,
+  } = countdown;
 
   useWakeLock(stage === 'countdown' || stage === 'holding');
 
@@ -74,6 +87,13 @@ export function BreathHoldFlow() {
     [holds, lastResult],
   );
 
+  const reset = () => {
+    setLastResult(null);
+    setStage('idle');
+    resetHold(0);
+    resetCountdown(READY_SECONDS * 1000);
+  };
+
   const start = () => {
     setLastResult(null);
     setStage('countdown');
@@ -91,7 +111,10 @@ export function BreathHoldFlow() {
     setStage('finished');
     updateSession({ phase: 'complete', isRunning: false });
     const avgHr = recorder.getAverage();
-    await saveMutation.mutateAsync({ durationSeconds: seconds, avg_heart_rate: avgHr ?? undefined });
+    await saveMutation.mutateAsync({
+      durationSeconds: seconds,
+      avg_heart_rate: avgHr ?? undefined,
+    });
     recorder.reset();
     clearSession();
   };
@@ -101,8 +124,12 @@ export function BreathHoldFlow() {
       <Card className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">Max Breath Hold</p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">Static apnea PB</h2>
+            <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">
+              Max Breath Hold
+            </p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
+              Static apnea PB
+            </h2>
           </div>
           {isNewRecord ? <Badge>New Record</Badge> : null}
         </div>
@@ -112,26 +139,51 @@ export function BreathHoldFlow() {
             'Always practice in a safe environment — seated or lying down, never in water.',
             'Exhale fully before starting your hold for a consistent baseline.',
             'Relax your body completely — tension burns oxygen.',
-            'Don\'t push to discomfort. The goal is a calm, controlled hold.',
+            "Don't push to discomfort. The goal is a calm, controlled hold.",
             'Wait at least 2-3 minutes between attempts to recover fully.',
           ]}
         />
-        <CircleAnimation phase={stage === 'countdown' ? 'rest' : stage === 'holding' ? 'hold' : 'idle'} intensity={1.4} />
+        <CircleAnimation
+          phase={
+            stage === 'countdown'
+              ? 'rest'
+              : stage === 'holding'
+                ? 'hold'
+                : 'idle'
+          }
+          intensity={1.4}
+        />
         {stage === 'countdown' ? (
           <div className="space-y-4">
-            <TimerText value={formatClock(countdownSeconds)} label="Get ready" />
-            <div className="flex justify-center"><BpmIndicator /></div>
+            <TimerText
+              value={formatClock(countdownSeconds)}
+              label="Get ready"
+            />
+            <div className="flex justify-center">
+              <BpmIndicator />
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
-            <TimerText value={formatDurationPrecise(holdElapsedMs)} label={stage === 'holding' ? 'Holding' : 'Timer'} />
-            {stage === 'holding' ? <div className="flex justify-center"><BpmIndicator /></div> : null}
+            <TimerText
+              value={formatDurationPrecise(holdElapsedMs)}
+              label={stage === 'holding' ? 'Holding' : 'Timer'}
+            />
+            {stage === 'holding' ? (
+              <div className="flex justify-center">
+                <BpmIndicator />
+              </div>
+            ) : null}
           </div>
         )}
         <div className="flex gap-3">
-          {stage === 'idle' || stage === 'finished' ? (
+          {stage === 'idle' ? (
             <Button fullWidth onClick={start}>
               Start test
+            </Button>
+          ) : stage === 'finished' ? (
+            <Button fullWidth onClick={reset}>
+              Done
             </Button>
           ) : (
             <Button fullWidth variant="danger" onClick={() => void stop()}>
@@ -150,7 +202,9 @@ export function BreathHoldFlow() {
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-semibold text-white">Leaderboard</h3>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-500">{holds.length} entries</span>
+            <span className="text-sm text-slate-500">
+              {holds.length} entries
+            </span>
           </div>
         </div>
         <div className="space-y-3">
@@ -160,7 +214,9 @@ export function BreathHoldFlow() {
               className={`flex items-center justify-between rounded-3xl border px-4 py-3 ${entry.isCurrent ? 'border-sky-300/30 bg-sky-300/10' : 'border-white/6 bg-slate-950/45'}`}
             >
               <div className="min-w-0 flex-1">
-                <p className="text-xs tracking-[0.2em] text-slate-500 uppercase">#{entry.rank}</p>
+                <p className="text-xs tracking-[0.2em] text-slate-500 uppercase">
+                  #{entry.rank}
+                </p>
                 <p className="mt-1 text-lg font-medium text-white">
                   {formatClock(entry.duration_seconds)}
                 </p>
@@ -168,7 +224,11 @@ export function BreathHoldFlow() {
               <div className="flex items-center gap-3 shrink-0">
                 <p className="text-sm text-slate-400">
                   {new Date(entry.recorded_at).toLocaleDateString()}
-                  {entry.avg_heart_rate ? <span className="ml-1.5 text-xs text-slate-500">· {entry.avg_heart_rate} bpm</span> : null}
+                  {entry.avg_heart_rate ? (
+                    <span className="ml-1.5 text-xs text-slate-500">
+                      · {entry.avg_heart_rate} bpm
+                    </span>
+                  ) : null}
                 </p>
                 <button
                   type="button"
@@ -181,7 +241,9 @@ export function BreathHoldFlow() {
               </div>
             </div>
           ))}
-          {leaderboard.length === 0 ? <p className="text-sm text-slate-500">No recorded holds yet.</p> : null}
+          {leaderboard.length === 0 ? (
+            <p className="text-sm text-slate-500">No recorded holds yet.</p>
+          ) : null}
         </div>
         <ConfirmModal
           open={deleteTarget !== null}
