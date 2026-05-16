@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { BluetoothOff, Heart } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { InfoBlock } from '../../../components/ui/InfoBlock';
 import { useBluetoothHR } from '../../../hooks/useBluetoothHR';
 import { useSettingsStore } from '../../../stores/settingsStore';
+import { useAuthStore } from '../../../stores/authStore';
+import { isSupabaseConfigured } from '../../../lib/supabase';
+import { signInWithMagicLink } from '../../../lib/repository';
 
 export function SettingsFlow() {
   const { bpm, isConnected, deviceName, connect, disconnect, isSupported } =
@@ -30,6 +34,9 @@ export function SettingsFlow() {
     }
   };
 
+  const user = useAuthStore((state) => state.user);
+  const isLocalMode = useAuthStore((state) => state.isLocalMode);
+
   const {
     holdPrepTimeEnabled,
     holdPrepTimeSeconds,
@@ -37,13 +44,90 @@ export function SettingsFlow() {
     setHoldPrepTimeSeconds,
   } = useSettingsStore();
 
+  const [email, setEmail] = useState('');
+  const [linkStatus, setLinkStatus] = useState<string | null>(null);
+  const [isLinking, setIsLinking] = useState(false);
+
+  const handleLinkAccount = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLinkStatus(null);
+    setIsLinking(true);
+    try {
+      await signInWithMagicLink(email.trim());
+      setLinkStatus(
+        `Magic link sent to ${email.trim()}. Open the email on this device to link your account.`,
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unable to send magic link.';
+      setLinkStatus(message);
+    } finally {
+      setIsLinking(false);
+    }
+  };
+
   const handleDisconnect = () => {
     disconnect();
     setError(null);
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(320px,420px)]">
+    <div className="space-y-6">
+      {isLocalMode && !user ? (
+        <Card className="space-y-6">
+          <div>
+            <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">
+              Account
+            </p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
+              Cloud Sync
+            </h2>
+          </div>
+
+          {isSupabaseConfigured ? (
+            <form
+              className="space-y-4"
+              onSubmit={(event) => void handleLinkAccount(event)}
+            >
+              <p className="text-sm text-slate-400">
+                Link your local data to a real account to sync across devices.
+              </p>
+              <label className="block text-sm text-slate-300">
+                Email
+                <input
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </label>
+              <Button fullWidth disabled={isLinking}>
+                {isLinking ? 'Sending link…' : 'Link account'}
+              </Button>
+              {linkStatus ? (
+                <p className="text-sm text-slate-400">{linkStatus}</p>
+              ) : null}
+            </form>
+          ) : (
+            <div className="space-y-3 text-sm text-slate-400">
+              <p>
+                To enable cloud sync, add your Supabase credentials in a{' '}
+                <code className="rounded bg-slate-800 px-1.5 py-0.5 text-xs">
+                  .env.local
+                </code>{' '}
+                file:
+              </p>
+              <pre className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-xs text-slate-400">
+                {`VITE_SUPABASE_URL=your_url\nVITE_SUPABASE_ANON_KEY=your_key`}
+              </pre>
+            </div>
+          )}
+        </Card>
+      ) : null}
+
       <Card className="space-y-6">
         <div>
           <p className="text-xs tracking-[0.28em] text-slate-500 uppercase">
@@ -53,6 +137,18 @@ export function SettingsFlow() {
             Heart Rate Monitor
           </h2>
         </div>
+
+        <InfoBlock
+          description="Web Bluetooth lets the browser talk directly to BLE devices, but it comes with a few important restrictions."
+          tips={[
+            'Only works in Chrome, Edge, and Samsung Internet — Safari and Firefox are not supported.',
+            'Requires HTTPS (or localhost during development). Plain HTTP will not work.',
+            'You must tap the "Connect" button to trigger the device chooser — it cannot be automated.',
+            'The connection may drop if the device goes out of range. Reconnection requires a fresh pairing.',
+            'iOS support is limited and often unreliable. A native app may be needed for consistent results.',
+            'Only one HR monitor can be connected at a time.',
+          ]}
+        />
 
         {!isSupported ? (
           <div className="rounded-3xl border border-white/8 bg-slate-950/45 px-5 py-8 text-center">
@@ -112,21 +208,6 @@ export function SettingsFlow() {
           </div>
         )}
 
-        <InfoBlock
-          description="Web Bluetooth lets the browser talk directly to BLE devices, but it comes with a few important restrictions."
-          tips={[
-            'Only works in Chrome, Edge, and Samsung Internet — Safari and Firefox are not supported.',
-            'Requires HTTPS (or localhost during development). Plain HTTP will not work.',
-            'You must tap the "Connect" button to trigger the device chooser — it cannot be automated.',
-            'The connection may drop if the device goes out of range. Reconnection requires a fresh pairing.',
-            'iOS support is limited and often unreliable. A native app may be needed for consistent results.',
-            'Only one HR monitor can be connected at a time.',
-          ]}
-        />
-      </Card>
-
-      <Card className="space-y-4">
-        <h3 className="text-xl font-semibold text-white">Info</h3>
         <div className="space-y-3 text-sm text-slate-400">
           <p>
             Pair a Bluetooth Low Energy (BLE) heart rate monitor to see live BPM
